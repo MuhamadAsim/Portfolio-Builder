@@ -25,10 +25,10 @@ Mark tasks `[x]` as they are completed.
 - [x] Unit tests for slug rules, token hashing, and schema edge cases.
 
 ## Phase 3 — Template A
-- [ ] Define the template contract and registry.
-- [ ] Create sample data.
-- [ ] Port reference A into `src/templates/template-a/` (pure render + plain CSS).
-- [ ] Temporary dev route to render it with sample data. Run the template verification
+- [x] Define the template contract and registry.
+- [x] Create sample data.
+- [x] Port reference A into `src/templates/template-a/` (pure render + plain CSS).
+- [x] Temporary dev route to render it with sample data. Run the template verification
       checklist (minimal / maximal / XSS / responsive).
 
 ## Phase 4 — Template B
@@ -61,6 +61,7 @@ Mark tasks `[x]` as they are completed.
 ## Phase 9 — Hardening and polish
 - [ ] Rate limiting on publish, upload, and slug-check.
 - [ ] Security review against the rules in `AGENTS.md` (XSS, URL validation, upload checks).
+- [ ] Remove temporary dev preview route (`/preview`) before final release.
 - [ ] Error and empty states, loading states, accessibility pass, mobile pass.
 - [ ] Root `README.md`: setup, env vars, how subdomains work locally, how to deploy later
       (wildcard DNS + SSL).
