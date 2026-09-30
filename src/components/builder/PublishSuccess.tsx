@@ -8,6 +8,8 @@ export interface PublishSuccessProps {
   token: string;
   publicUrl: string;
   fallbackUrl: string;
+  mode?: "create" | "edit";
+  onContinueEditing?: () => void;
 }
 
 export function PublishSuccess({
@@ -15,15 +17,17 @@ export function PublishSuccess({
   token,
   publicUrl,
   fallbackUrl,
+  mode = "create",
+  onContinueEditing,
 }: PublishSuccessProps) {
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
-  const [tokenSaved, setTokenSaved] = useState(false);
+  const [tokenSaved, setTokenSaved] = useState(mode === "edit");
   const manualInputRef = useRef<HTMLInputElement>(null);
 
-  // Beforeunload warning active until user explicitly ticks "I have saved my token"
+  // Beforeunload warning active until user explicitly ticks "I have saved my token" (only in create mode)
   useEffect(() => {
-    if (tokenSaved) return;
+    if (tokenSaved || mode === "edit") return;
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
@@ -35,7 +39,7 @@ export function PublishSuccess({
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [tokenSaved]);
+  }, [tokenSaved, mode]);
 
   const handleCopy = async () => {
     try {
@@ -74,10 +78,20 @@ export function PublishSuccess({
           </svg>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          Your Portfolio is Live!
+          {mode === "edit" ? "Changes Saved Successfully!" : "Your Portfolio is Live!"}
         </h1>
         <p className="text-sm text-slate-300">
-          Published successfully under slug <span className="font-mono text-indigo-300 font-semibold">{slug}</span>.
+          {mode === "edit" ? (
+            <>
+              Updated portfolio under slug{" "}
+              <span className="font-mono text-indigo-300 font-semibold">{slug}</span>.
+            </>
+          ) : (
+            <>
+              Published successfully under slug{" "}
+              <span className="font-mono text-indigo-300 font-semibold">{slug}</span>.
+            </>
+          )}
         </p>
       </div>
 
@@ -129,10 +143,12 @@ export function PublishSuccess({
           <span className="text-xl leading-none">⚠️</span>
           <div className="space-y-1">
             <h2 className="text-sm font-bold text-amber-100 uppercase tracking-wider">
-              Secret Edit Token — Save This Now
+              {mode === "edit" ? "Secret Edit Token" : "Secret Edit Token — Save This Now"}
             </h2>
             <p className="text-xs text-amber-200/90 leading-relaxed">
-              This token is <strong>only shown once</strong>. We only store an encrypted hash on the server, so we cannot recover it for you if lost. You will need it to edit your portfolio in the future.
+              {mode === "edit"
+                ? "This is your portfolio's edit token. Keep it handy whenever you wish to return and update your content."
+                : "This token is only shown once. We only store an encrypted hash on the server, so we cannot recover it for you if lost. You will need it to edit your portfolio in the future."}
             </p>
           </div>
         </div>
@@ -162,17 +178,19 @@ export function PublishSuccess({
           </p>
         )}
 
-        <label className="flex items-start gap-2.5 pt-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={tokenSaved}
-            onChange={(e) => setTokenSaved(e.target.checked)}
-            className="mt-0.5 rounded border-amber-600 bg-amber-950 text-indigo-600 focus:ring-amber-500 focus:ring-offset-slate-900 w-4 h-4 cursor-pointer"
-          />
-          <span className="text-xs font-medium text-amber-100">
-            I have saved my edit token in a safe place.
-          </span>
-        </label>
+        {mode === "create" && (
+          <label className="flex items-start gap-2.5 pt-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={tokenSaved}
+              onChange={(e) => setTokenSaved(e.target.checked)}
+              className="mt-0.5 rounded border-amber-600 bg-amber-950 text-indigo-600 focus:ring-amber-500 focus:ring-offset-slate-900 w-4 h-4 cursor-pointer"
+            />
+            <span className="text-xs font-medium text-amber-100">
+              I have saved my edit token in a safe place.
+            </span>
+          </label>
+        )}
       </div>
 
       {/* Export & Actions */}
@@ -188,12 +206,24 @@ export function PublishSuccess({
           <span>Download Static ZIP</span>
         </a>
 
-        <Link
-          href="/"
-          className="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition-colors"
-        >
-          Done / Return Home
-        </Link>
+        <div className="w-full sm:w-auto flex items-center gap-3">
+          {onContinueEditing && (
+            <button
+              type="button"
+              onClick={onContinueEditing}
+              className="flex-1 sm:flex-none text-center px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-colors"
+            >
+              ← Keep Editing
+            </button>
+          )}
+
+          <Link
+            href="/"
+            className="flex-1 sm:flex-none text-center px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition-colors"
+          >
+            Done / Return Home
+          </Link>
+        </div>
       </div>
     </div>
   );

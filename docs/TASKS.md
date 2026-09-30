@@ -55,9 +55,9 @@ Mark tasks `[x]` as they are completed.
 - [x] Test: unzip, open `index.html` offline, compare visually to the live page.
 
 ## Phase 8 — Edit and delete
-- [ ] `/edit` page: slug + token → load data into the form.
-- [ ] `PUT` and `DELETE` endpoints with token check (constant-time compare).
-- [ ] Delete also removes the portfolio's uploaded images.
+- [x] `/edit` page: slug + token → load data into the form.
+- [x] `PUT` and `DELETE` endpoints with token check (constant-time compare).
+- [x] Delete also removes the portfolio's uploaded images.
 
 ## Phase 9 — Hardening and polish
 - [ ] Rate limiting on publish, upload, and slug-check.

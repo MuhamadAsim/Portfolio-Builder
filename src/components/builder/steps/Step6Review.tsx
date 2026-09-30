@@ -14,6 +14,8 @@ interface Step6ReviewProps {
   mode?: "create" | "edit";
   publishError?: string | null;
   onRetryPublish?: () => void;
+  onDeletePortfolio?: () => void;
+  isDeleting?: boolean;
 }
 
 export function Step6Review({
@@ -26,6 +28,8 @@ export function Step6Review({
   mode = "create",
   publishError,
   onRetryPublish,
+  onDeletePortfolio,
+  isDeleting,
 }: Step6ReviewProps) {
   return (
     <fieldset className="space-y-6">
@@ -38,7 +42,9 @@ export function Step6Review({
           Review & Summary
         </h2>
         <p className="text-sm text-slate-400 mt-1">
-          Check your details against the live preview before continuing to publishing.
+          {mode === "edit"
+            ? "Review your changes against the live preview before saving updates."
+            : "Check your details against the live preview before continuing to publishing."}
         </p>
       </div>
 
@@ -72,7 +78,8 @@ export function Step6Review({
       {/* Slug Configuration & Live Availability Check */}
       <div className="p-5 rounded-xl bg-slate-900 border border-slate-700/80 space-y-3">
         <label htmlFor="portfolioSlug" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-          Choose Your Portfolio URL Slug <span className="text-rose-400">*</span>
+          {mode === "edit" ? "Portfolio URL Slug" : "Choose Your Portfolio URL Slug"}{" "}
+          <span className="text-rose-400">*</span>
         </label>
 
         <div className="flex items-center rounded-lg bg-slate-950 border border-slate-700 overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
@@ -128,7 +135,9 @@ export function Step6Review({
           <div className="flex items-start gap-2.5">
             <span className="text-base leading-none">⚠️</span>
             <div>
-              <strong className="font-semibold block text-rose-100">Unable to publish</strong>
+              <strong className="font-semibold block text-rose-100">
+                {mode === "edit" ? "Unable to save changes" : "Unable to publish"}
+              </strong>
               <p className="mt-0.5 text-rose-200/90">{publishError}</p>
             </div>
           </div>
@@ -145,9 +154,30 @@ export function Step6Review({
       )}
 
       {mode === "edit" ? (
-        <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-800/40 text-xs text-amber-300 leading-relaxed">
-          ℹ️ You are in edit mode. Saving edits to published portfolios will be enabled in Phase 8.
-        </div>
+        <>
+          <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-800/40 text-xs text-indigo-300 leading-relaxed">
+            ℹ️ You are editing an active portfolio. Changes will immediately update your published site. If you rename your slug, your old URL will point to this new one.
+          </div>
+
+          {onDeletePortfolio && (
+            <div className="p-4 rounded-xl bg-rose-950/30 border border-rose-800/40 space-y-2">
+              <h3 className="text-xs font-bold text-rose-300 uppercase tracking-wider">
+                Danger Zone
+              </h3>
+              <p className="text-xs text-rose-300/80 leading-relaxed">
+                Permanently delete this portfolio and remove all uploaded images.
+              </p>
+              <button
+                type="button"
+                onClick={onDeletePortfolio}
+                disabled={isDeleting}
+                className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-200 bg-rose-900/60 hover:bg-rose-800/80 border border-rose-700/60 transition-colors disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "🗑️ Delete Portfolio"}
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-400 leading-relaxed">
           💡 Ready to launch? Double check your details. Once published, your portfolio will immediately be available at your custom slug URL.

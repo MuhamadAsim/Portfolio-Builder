@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useTransition } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +23,7 @@ import { Step4Experience } from "./steps/Step4Experience";
 import { Step5Projects } from "./steps/Step5Projects";
 import { Step6Review } from "./steps/Step6Review";
 import { publishPortfolio } from "@/lib/publish";
+import { updatePortfolio, deletePortfolio } from "@/lib/edit";
 import { PublishSuccess } from "./PublishSuccess";
 
 export function BuilderApp({
@@ -30,7 +31,10 @@ export function BuilderApp({
   initialData,
   initialSlug,
   initialTemplateId,
+  editToken,
+  onDeleteSuccess,
 }: BuilderAppProps = {}) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const requestedTemplate = searchParams?.get("template");
 
@@ -60,14 +64,19 @@ export function BuilderApp({
     return 1;
   });
 
+  const [activeSlug, setActiveSlug] = useState(initialSlug || "");
+  const currentPortfolioSlug = mode === "edit" ? activeSlug : "";
   const initialSlugValue = initialSlug || (initialDraft?.data?.slug as string) || "";
-  const { slug, setSlug, resetSlug, slugStatus, setSlugStatus } = useSlugCheck(initialSlugValue);
+  const { slug, setSlug, resetSlug, slugStatus, setSlugStatus } = useSlugCheck(
+    initialSlugValue,
+    currentPortfolioSlug
+  );
 
   const [mobileTab, setMobileTab] = useState<"form" | "preview">("form");
   const [lastValidData, setLastValidData] = useState<PortfolioData | null>(null);
   const [, startTransition] = useTransition();
 
-  // Publishing state - token lives only in component memory
+  // Publishing / Editing state - token lives only in component memory
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishedData, setPublishedData] = useState<{
@@ -76,6 +85,11 @@ export function BuilderApp({
     publicUrl: string;
     fallbackUrl: string;
   } | null>(null);
+
+  // Deletion modal state in edit mode
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
 
@@ -279,6 +293,104 @@ export function BuilderApp({
     }
   };
 
+  const handleSaveEdit = async () => {
+    if (mode !== "edit" || isPublishing || !editToken) return;
+
+    // 1. Validate form data across all sections with Zod schema
+    const parsedData = portfolioDataSchema.safeParse(getValues());
+    if (!parsedData.success) {
+      await trigger();
+      const errFields = parsedData.error.issues.map((i) => i.path[0]);
+      if (errFields.includes("basics")) setCurrentStep(1);
+      else if (errFields.includes("contact")) setCurrentStep(2);
+      else if (errFields.includes("skills")) setCurrentStep(3);
+      else if (errFields.includes("experience") || errFields.includes("education")) setCurrentStep(4);
+      else if (errFields.includes("projects")) setCurrentStep(5);
+      return;
+    }
+
+    // 2. Validate slug
+    if (!slug) {
+      setSlugStatus({
+        status: "unavailable",
+        message: "Please choose a valid slug for your portfolio.",
+      });
+      return;
+    }
+
+    if (slugStatus.status !== "available") {
+      return;
+    }
+
+    setIsPublishing(true);
+    setPublishError(null);
+
+    const result = await updatePortfolio(
+      activeSlug,
+      {
+        templateId,
+        slug,
+        data: parsedData.data,
+      },
+      editToken
+    );
+
+    setIsPublishing(false);
+
+    if (result.kind === "success") {
+      setActiveSlug(result.data.slug);
+      setPublishedData({
+        slug: result.data.slug,
+        token: editToken,
+        publicUrl: result.data.publicUrl,
+        fallbackUrl: result.data.fallbackUrl,
+      });
+    } else if (result.kind === "slug_taken") {
+      setSlugStatus({ status: "unavailable", message: result.message });
+      setPublishError(result.message);
+    } else if (result.kind === "validation_error") {
+      setPublishError(result.message);
+      if (result.details && typeof result.details === "object") {
+        const d = result.details as Record<string, unknown>;
+        if (d.data && typeof d.data === "object") {
+          const inner = d.data as Record<string, unknown>;
+          if (inner.basics) setCurrentStep(1);
+          else if (inner.contact) setCurrentStep(2);
+          else if (inner.skills) setCurrentStep(3);
+          else if (inner.experience || inner.education) setCurrentStep(4);
+          else if (inner.projects) setCurrentStep(5);
+        } else if (d.slug) {
+          setSlugStatus({ status: "unavailable", message: "Invalid slug format" });
+        }
+      }
+    } else if (result.kind === "unauthorized") {
+      setPublishError("Unauthorized: Invalid edit token. Please check your credentials.");
+    } else {
+      setPublishError(result.message);
+    }
+  };
+
+  const handleDeletePortfolio = async () => {
+    if (mode !== "edit" || isDeleting || !editToken) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    const result = await deletePortfolio(activeSlug, editToken);
+    setIsDeleting(false);
+
+    if (result.kind === "success") {
+      setShowDeleteModal(false);
+      if (onDeleteSuccess) {
+        onDeleteSuccess();
+      } else {
+        router.push("/");
+      }
+    } else {
+      setDeleteError(result.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
       {/* Top App Bar */}
@@ -294,11 +406,12 @@ export function BuilderApp({
             <span className="text-slate-600">/</span>
             {publishedData ? (
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
-                Published
+                {mode === "edit" ? "Changes Saved" : "Published"}
               </span>
             ) : (
               <span className="text-xs font-medium text-slate-400">
-                Step {currentStep} of 6: <strong className="text-slate-200">{STEP_NAMES[currentStep - 1]}</strong>
+                {mode === "edit" ? "Edit Mode · " : ""}Step {currentStep} of 6:{" "}
+                <strong className="text-slate-200">{STEP_NAMES[currentStep - 1]}</strong>
               </span>
             )}
           </div>
@@ -311,6 +424,15 @@ export function BuilderApp({
                 className="text-xs font-medium text-slate-400 hover:text-rose-400 transition-colors px-2.5 py-1.5 rounded border border-slate-800 hover:border-rose-900"
               >
                 Reset Draft
+              </button>
+            )}
+            {mode === "edit" && !publishedData && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className="text-xs font-medium text-rose-400 hover:text-rose-300 transition-colors px-2.5 py-1.5 rounded border border-rose-900/60 hover:border-rose-700 bg-rose-950/30"
+              >
+                Delete Portfolio
               </button>
             )}
             <Link
@@ -359,6 +481,8 @@ export function BuilderApp({
             token={publishedData.token}
             publicUrl={publishedData.publicUrl}
             fallbackUrl={publishedData.fallbackUrl}
+            mode={mode}
+            onContinueEditing={() => setPublishedData(null)}
           />
         </main>
       ) : (
@@ -450,7 +574,9 @@ export function BuilderApp({
                   slugStatus={slugStatus}
                   mode={mode}
                   publishError={publishError}
-                  onRetryPublish={handlePublish}
+                  onRetryPublish={mode === "edit" ? handleSaveEdit : handlePublish}
+                  onDeletePortfolio={() => setShowDeleteModal(true)}
+                  isDeleting={isDeleting}
                 />
               )}
 
@@ -501,9 +627,27 @@ export function BuilderApp({
                       )}
                     </button>
                   ) : (
-                    <span className="text-xs text-amber-400 font-medium">
-                      Editing published portfolios will be available in Phase 8
-                    </span>
+                    <button
+                      type="button"
+                      onClick={handleSaveEdit}
+                      disabled={isPublishing || slugStatus.status !== "available"}
+                      className={`px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg transition-all flex items-center gap-2 ${
+                        isPublishing || slugStatus.status !== "available"
+                          ? "bg-indigo-600/50 cursor-not-allowed opacity-60"
+                          : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30 hover:scale-[1.02]"
+                      }`}
+                    >
+                      {isPublishing ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Saving Changes...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>💾 Save Changes</span>
+                        </>
+                      )}
+                    </button>
                   )}
                 </div>
               </div>
@@ -523,6 +667,64 @@ export function BuilderApp({
             />
           </section>
         </main>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in"
+        >
+          <div className="bg-slate-900 border border-rose-900/60 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-rose-400">
+              <span className="w-10 h-10 rounded-full bg-rose-950 flex items-center justify-center text-xl font-bold border border-rose-800">
+                ⚠️
+              </span>
+              <div>
+                <h3 id="delete-dialog-title" className="text-base font-bold text-white">
+                  Delete Portfolio?
+                </h3>
+                <p className="text-xs text-rose-300/80">This action cannot be undone.</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Are you sure you want to permanently delete{" "}
+              <strong className="text-white font-mono">{activeSlug}</strong>? All portfolio content,
+              settings, and uploaded images will be permanently removed.
+            </p>
+
+            {deleteError && (
+              <div className="p-3 rounded-lg bg-rose-950/80 border border-rose-700/60 text-xs text-rose-200">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteError(null);
+                }}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeletePortfolio}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-lg text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 shadow-md shadow-rose-600/30 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Yes, Delete Portfolio"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

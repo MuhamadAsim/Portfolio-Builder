@@ -19,6 +19,12 @@ export default function HomePage() {
           </Link>
           <div className="flex items-center gap-3">
             <Link
+              href="/edit"
+              className="text-xs sm:text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 transition-colors"
+            >
+              Edit Portfolio
+            </Link>
+            <Link
               href="/create"
               className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow-sm shadow-indigo-600/30"
             >
@@ -157,9 +163,13 @@ export default function HomePage() {
       <footer className="border-t border-slate-800 bg-slate-950 py-8 px-4 sm:px-6 text-center text-xs text-slate-500">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Portfolio Builder. Free and open source.</p>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             <Link href="/create" className="hover:text-slate-400 transition-colors">
               Create Portfolio
+            </Link>
+            <span>•</span>
+            <Link href="/edit" className="hover:text-slate-400 transition-colors">
+              Edit Portfolio
             </Link>
           </div>
         </div>

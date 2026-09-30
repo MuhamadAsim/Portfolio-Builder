@@ -42,4 +42,6 @@ export interface BuilderAppProps {
   initialData?: PortfolioFormValues;
   initialSlug?: string;
   initialTemplateId?: "template-a" | "template-b";
+  editToken?: string;
+  onDeleteSuccess?: () => void;
 }

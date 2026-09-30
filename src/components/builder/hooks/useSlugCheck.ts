@@ -7,29 +7,43 @@ export interface SlugState {
   message?: string;
 }
 
-export function useSlugCheck(initialSlug = "") {
+export function useSlugCheck(initialSlug = "", currentSlug = "") {
   const [slug, setSlugState] = useState<string>(initialSlug);
-  const [slugStatus, setSlugStatus] = useState<SlugState>(() => ({
-    status: initialSlug ? "checking" : "idle",
-  }));
+  const [slugStatus, setSlugStatus] = useState<SlugState>(() => {
+    if (!initialSlug) return { status: "idle" };
+    if (currentSlug && initialSlug === currentSlug) {
+      return { status: "available", message: "Current portfolio slug" };
+    }
+    return { status: "checking" };
+  });
 
   const setSlug = useCallback((newSlug: string) => {
     const formatted = newSlug.toLowerCase().trim();
     setSlugState(formatted);
     if (!formatted) {
       setSlugStatus({ status: "idle" });
+    } else if (currentSlug && formatted === currentSlug) {
+      setSlugStatus({ status: "available", message: "Current portfolio slug" });
     } else {
       setSlugStatus({ status: "checking" });
     }
-  }, []);
+  }, [currentSlug]);
 
   const resetSlug = useCallback((emptySlug = "") => {
     setSlugState(emptySlug);
-    setSlugStatus({ status: emptySlug ? "checking" : "idle" });
-  }, []);
+    if (!emptySlug) {
+      setSlugStatus({ status: "idle" });
+    } else if (currentSlug && emptySlug === currentSlug) {
+      setSlugStatus({ status: "available", message: "Current portfolio slug" });
+    } else {
+      setSlugStatus({ status: "checking" });
+    }
+  }, [currentSlug]);
 
   useEffect(() => {
-    if (!slug) return;
+    if (!slug || (currentSlug && slug === currentSlug)) {
+      return;
+    }
 
     let cancelled = false;
     const timer = setTimeout(async () => {
@@ -63,7 +77,7 @@ export function useSlugCheck(initialSlug = "") {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [slug]);
+  }, [slug, currentSlug]);
 
   return {
     slug,
