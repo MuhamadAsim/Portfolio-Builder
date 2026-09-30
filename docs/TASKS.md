@@ -5,24 +5,24 @@ Work **one phase at a time**. At the end of each phase: run `typecheck`, `lint`,
 Mark tasks `[x]` as they are completed.
 
 ## Phase 0 — Setup
-- [ ] Scaffold Next.js (App Router, TypeScript, Tailwind, ESLint) in the project root.
+- [x] Scaffold Next.js (App Router, TypeScript, Tailwind, ESLint) in the project root.
       Keep `references/`, `AGENTS.md`, and `docs/` in place.
-- [ ] Add Prisma + SQLite, Zod, React Hook Form, sharp, archiver, Vitest (check current docs).
-- [ ] Add `.env.example` (`DATABASE_URL`, `ROOT_DOMAIN=localhost:3000`) and gitignore
+- [x] Add Prisma + SQLite, Zod, React Hook Form, sharp, archiver, Vitest (check current docs).
+- [x] Add `.env.example` (`DATABASE_URL`, `ROOT_DOMAIN=localhost:3000`) and gitignore
       `.env`, `prisma/*.db`, `uploads/`.
-- [ ] Add npm scripts (`typecheck`, `test`) and update the Commands section in `AGENTS.md`.
-- [ ] Verify: app boots, build passes.
+- [x] Add npm scripts (`typecheck`, `test`) and update the Commands section in `AGENTS.md`.
+- [x] Verify: app boots, build passes.
 
 ## Phase 1 — Reference audit (no code)
-- [ ] Audit both reference portfolios per `docs/TEMPLATES.md` Step 1.
-- [ ] Report: sections, hard-coded content, dependencies, missing schema fields.
-- [ ] Propose schema additions if needed. **Wait for approval.**
+- [x] Audit both reference portfolios per `docs/TEMPLATES.md` Step 1.
+- [x] Report: sections, hard-coded content, dependencies, missing schema fields.
+- [x] Propose schema additions if needed. **Wait for approval.**
 
 ## Phase 2 — Data layer
-- [ ] Implement `src/lib/schema/portfolio.ts` per `docs/DATA_SCHEMA.md` (with approved changes).
-- [ ] Prisma model + first migration.
-- [ ] `slug.ts` (validation + reserved words), `tokens.ts` (generate/hash/verify).
-- [ ] Unit tests for slug rules, token hashing, and schema edge cases.
+- [x] Implement `src/lib/schema/portfolio.ts` per `docs/DATA_SCHEMA.md` (with approved changes).
+- [x] Prisma model + first migration.
+- [x] `slug.ts` (validation + reserved words), `tokens.ts` (generate/hash/verify).
+- [x] Unit tests for slug rules, token hashing, and schema edge cases.
 
 ## Phase 3 — Template A
 - [ ] Define the template contract and registry.

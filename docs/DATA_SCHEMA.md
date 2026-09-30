@@ -28,6 +28,8 @@ export const experienceSchema = z.object({
   startDate: z.string().min(1),        // "2022-03"
   endDate: z.string().optional(),      // empty = present
   description: z.string().max(800).default(''),
+  location: z.string().max(80).optional(),
+  workType: z.string().max(40).optional(), // e.g. "Full-time", "Remote"
 });
 
 export const educationSchema = z.object({
@@ -47,6 +49,7 @@ export const portfolioDataSchema = z.object({
     fullName: z.string().min(2).max(80),
     title: z.string().min(2).max(100),
     bio: z.string().min(10).max(600),
+    bioQuote: z.string().max(200).optional(),
     location: z.string().max(80).optional(),
     photo: z.string().optional(),      // stored filename
   }),
