@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         filename: result.filename,
-        url: `/uploads/${result.filename}`,
+        url: `/uploads/tmp/${result.filename}`,
       },
       { status: 201 }
     );

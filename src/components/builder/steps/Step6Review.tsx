@@ -11,6 +11,9 @@ interface Step6ReviewProps {
   slug: string;
   onSlugChange: (val: string) => void;
   slugStatus: SlugState;
+  mode?: "create" | "edit";
+  publishError?: string | null;
+  onRetryPublish?: () => void;
 }
 
 export function Step6Review({
@@ -20,6 +23,9 @@ export function Step6Review({
   slug,
   onSlugChange,
   slugStatus,
+  mode = "create",
+  publishError,
+  onRetryPublish,
 }: Step6ReviewProps) {
   return (
     <fieldset className="space-y-6">
@@ -114,9 +120,39 @@ export function Step6Review({
         </div>
       </div>
 
-      <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-800/40 text-xs text-indigo-300 leading-relaxed">
-        ✓ Checkpoint 5b complete. Upload endpoint, image processing, and slug check are integrated and verified.
-      </div>
+      {publishError && (
+        <div
+          role="alert"
+          className="p-4 rounded-xl bg-rose-950/60 border border-rose-500/50 text-rose-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in"
+        >
+          <div className="flex items-start gap-2.5">
+            <span className="text-base leading-none">⚠️</span>
+            <div>
+              <strong className="font-semibold block text-rose-100">Unable to publish</strong>
+              <p className="mt-0.5 text-rose-200/90">{publishError}</p>
+            </div>
+          </div>
+          {onRetryPublish && (
+            <button
+              type="button"
+              onClick={onRetryPublish}
+              className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold transition-colors shrink-0 shadow-sm"
+            >
+              Retry
+            </button>
+          )}
+        </div>
+      )}
+
+      {mode === "edit" ? (
+        <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-800/40 text-xs text-amber-300 leading-relaxed">
+          ℹ️ You are in edit mode. Saving edits to published portfolios will be enabled in Phase 8.
+        </div>
+      ) : (
+        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-400 leading-relaxed">
+          💡 Ready to launch? Double check your details. Once published, your portfolio will immediately be available at your custom slug URL.
+        </div>
+      )}
     </fieldset>
   );
 }

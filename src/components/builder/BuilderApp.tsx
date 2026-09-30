@@ -22,6 +22,8 @@ import { Step3Skills } from "./steps/Step3Skills";
 import { Step4Experience } from "./steps/Step4Experience";
 import { Step5Projects } from "./steps/Step5Projects";
 import { Step6Review } from "./steps/Step6Review";
+import { publishPortfolio } from "@/lib/publish";
+import { PublishSuccess } from "./PublishSuccess";
 
 export function BuilderApp({
   mode = "create",
@@ -64,6 +66,16 @@ export function BuilderApp({
   const [mobileTab, setMobileTab] = useState<"form" | "preview">("form");
   const [lastValidData, setLastValidData] = useState<PortfolioData | null>(null);
   const [, startTransition] = useTransition();
+
+  // Publishing state - token lives only in component memory
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishedData, setPublishedData] = useState<{
+    slug: string;
+    token: string;
+    publicUrl: string;
+    fallbackUrl: string;
+  } | null>(null);
 
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
 
@@ -200,6 +212,73 @@ export function BuilderApp({
     }
   };
 
+  const handlePublish = async () => {
+    if (mode !== "create" || isPublishing) return;
+
+    // 1. Validate full form data across all sections with Zod schema
+    const parsedData = portfolioDataSchema.safeParse(getValues());
+    if (!parsedData.success) {
+      await trigger(); // trigger React Hook Form inline field errors
+      const errFields = parsedData.error.issues.map((i) => i.path[0]);
+      if (errFields.includes("basics")) setCurrentStep(1);
+      else if (errFields.includes("contact")) setCurrentStep(2);
+      else if (errFields.includes("skills")) setCurrentStep(3);
+      else if (errFields.includes("experience") || errFields.includes("education")) setCurrentStep(4);
+      else if (errFields.includes("projects")) setCurrentStep(5);
+      return;
+    }
+
+    // 2. Validate slug availability
+    if (!slug) {
+      setSlugStatus({
+        status: "unavailable",
+        message: "Please choose a valid slug for your portfolio.",
+      });
+      return;
+    }
+
+    if (slugStatus.status !== "available") {
+      return;
+    }
+
+    setIsPublishing(true);
+    setPublishError(null);
+
+    const result = await publishPortfolio({
+      templateId,
+      slug,
+      data: parsedData.data,
+    });
+
+    setIsPublishing(false);
+
+    if (result.kind === "success") {
+      clearDraft();
+      setPublishedData(result.data);
+    } else if (result.kind === "slug_taken") {
+      setSlugStatus({ status: "unavailable", message: result.message });
+      setPublishError(result.message);
+    } else if (result.kind === "validation_error") {
+      setPublishError(result.message);
+      // Map server validation error back to step if specified
+      if (result.details && typeof result.details === "object") {
+        const d = result.details as Record<string, unknown>;
+        if (d.data && typeof d.data === "object") {
+          const inner = d.data as Record<string, unknown>;
+          if (inner.basics) setCurrentStep(1);
+          else if (inner.contact) setCurrentStep(2);
+          else if (inner.skills) setCurrentStep(3);
+          else if (inner.experience || inner.education) setCurrentStep(4);
+          else if (inner.projects) setCurrentStep(5);
+        } else if (d.slug) {
+          setSlugStatus({ status: "unavailable", message: "Invalid slug format" });
+        }
+      }
+    } else if (result.kind === "network_error") {
+      setPublishError(result.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
       {/* Top App Bar */}
@@ -213,13 +292,19 @@ export function BuilderApp({
               <span className="hidden sm:inline">Portfolio Builder</span>
             </Link>
             <span className="text-slate-600">/</span>
-            <span className="text-xs font-medium text-slate-400">
-              Step {currentStep} of 6: <strong className="text-slate-200">{STEP_NAMES[currentStep - 1]}</strong>
-            </span>
+            {publishedData ? (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
+                Published
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-slate-400">
+                Step {currentStep} of 6: <strong className="text-slate-200">{STEP_NAMES[currentStep - 1]}</strong>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
-            {mode === "create" && (
+            {mode === "create" && !publishedData && (
               <button
                 type="button"
                 onClick={handleResetDraft}
@@ -266,143 +351,179 @@ export function BuilderApp({
         </div>
       </div>
 
-      {/* Main Work Area: Split View on md+ */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        {/* Left Column: Multi-Step Form */}
-        <section
-          className={`bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 sm:p-8 flex flex-col shadow-xl ${
-            mobileTab === "preview" ? "hidden md:flex" : "flex"
-          }`}
-        >
-          {/* Progress Indicator */}
-          <div className="flex items-center gap-1.5 mb-6" aria-label="Step progress">
-            {STEP_NAMES.map((name, idx) => {
-              const stepNumber = idx + 1;
-              const isActive = stepNumber === currentStep;
-              const isPast = stepNumber < currentStep;
-
-              return (
-                <div
-                  key={name}
-                  className={`h-1.5 flex-1 rounded-full transition-all ${
-                    isActive
-                      ? "bg-indigo-500"
-                      : isPast
-                      ? "bg-emerald-500"
-                      : "bg-slate-700"
-                  }`}
-                  title={`Step ${stepNumber}: ${name}`}
-                />
-              );
-            })}
-          </div>
-
-          <form onSubmit={(e) => e.preventDefault()} noValidate>
-            {currentStep === 1 && (
-              <Step1Basics
-                stepHeadingRef={stepHeadingRef}
-                register={register}
-                setValue={setValue}
-                errors={errors}
-                templateId={templateId}
-                setTemplateId={setTemplateId}
-                photoValue={watchedValues.basics?.photo}
-              />
-            )}
-
-            {currentStep === 2 && (
-              <Step2Contact
-                stepHeadingRef={stepHeadingRef}
-                register={register}
-                errors={errors}
-              />
-            )}
-
-            {currentStep === 3 && (
-              <Step3Skills
-                stepHeadingRef={stepHeadingRef}
-                register={register}
-                skillsArray={skillsArray}
-              />
-            )}
-
-            {currentStep === 4 && (
-              <Step4Experience
-                stepHeadingRef={stepHeadingRef}
-                register={register}
-                experienceArray={experienceArray}
-                educationArray={educationArray}
-              />
-            )}
-
-            {currentStep === 5 && (
-              <Step5Projects
-                stepHeadingRef={stepHeadingRef}
-                register={register}
-                projectsArray={projectsArray}
-                setValue={setValue}
-                watchedProjects={watchedValues.projects}
-              />
-            )}
-
-            {currentStep === 6 && (
-              <Step6Review
-                stepHeadingRef={stepHeadingRef}
-                templateId={templateId}
-                watchedValues={watchedValues as PortfolioFormValues}
-                slug={slug}
-                onSlugChange={setSlug}
-                slugStatus={slugStatus}
-              />
-            )}
-
-            {/* Form Navigation Buttons */}
-            <div className="mt-8 pt-5 border-t border-slate-700/60 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={handleBack}
-                disabled={currentStep === 1}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  currentStep === 1
-                    ? "opacity-40 cursor-not-allowed text-slate-500"
-                    : "text-slate-300 hover:text-white bg-slate-900 border border-slate-700 hover:bg-slate-800"
-                }`}
-              >
-                ← Back
-              </button>
-
-              <div className="flex items-center gap-3">
-                {currentStep < 6 ? (
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="px-5 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all hover:translate-x-0.5"
-                  >
-                    Next Step →
-                  </button>
-                ) : (
-                  <span className="text-xs text-slate-400 font-medium">
-                    Review Complete
-                  </span>
-                )}
-              </div>
-            </div>
-          </form>
-        </section>
-
-        {/* Right Column: Live Preview */}
-        <section
-          className={`h-[680px] sticky top-20 ${
-            mobileTab === "form" ? "hidden md:block" : "block"
-          }`}
-        >
-          <PreviewPane
-            templateId={templateId}
-            previewData={previewState.data}
-            fallbackSections={previewState.fallbackSections}
+      {/* Main Work Area: Success Screen OR Split View on md+ */}
+      {publishedData ? (
+        <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 flex items-center justify-center">
+          <PublishSuccess
+            slug={publishedData.slug}
+            token={publishedData.token}
+            publicUrl={publishedData.publicUrl}
+            fallbackUrl={publishedData.fallbackUrl}
           />
-        </section>
-      </main>
+        </main>
+      ) : (
+        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          {/* Left Column: Multi-Step Form */}
+          <section
+            className={`bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 sm:p-8 flex flex-col shadow-xl ${
+              mobileTab === "preview" ? "hidden md:flex" : "flex"
+            }`}
+          >
+            {/* Progress Indicator */}
+            <div className="flex items-center gap-1.5 mb-6" aria-label="Step progress">
+              {STEP_NAMES.map((name, idx) => {
+                const stepNumber = idx + 1;
+                const isActive = stepNumber === currentStep;
+                const isPast = stepNumber < currentStep;
+
+                return (
+                  <div
+                    key={name}
+                    className={`h-1.5 flex-1 rounded-full transition-all ${
+                      isActive
+                        ? "bg-indigo-500"
+                        : isPast
+                        ? "bg-emerald-500"
+                        : "bg-slate-700"
+                    }`}
+                    title={`Step ${stepNumber}: ${name}`}
+                  />
+                );
+              })}
+            </div>
+
+            <form onSubmit={(e) => e.preventDefault()} noValidate>
+              {currentStep === 1 && (
+                <Step1Basics
+                  stepHeadingRef={stepHeadingRef}
+                  register={register}
+                  setValue={setValue}
+                  errors={errors}
+                  templateId={templateId}
+                  setTemplateId={setTemplateId}
+                  photoValue={watchedValues.basics?.photo}
+                />
+              )}
+
+              {currentStep === 2 && (
+                <Step2Contact
+                  stepHeadingRef={stepHeadingRef}
+                  register={register}
+                  errors={errors}
+                />
+              )}
+
+              {currentStep === 3 && (
+                <Step3Skills
+                  stepHeadingRef={stepHeadingRef}
+                  register={register}
+                  skillsArray={skillsArray}
+                />
+              )}
+
+              {currentStep === 4 && (
+                <Step4Experience
+                  stepHeadingRef={stepHeadingRef}
+                  register={register}
+                  experienceArray={experienceArray}
+                  educationArray={educationArray}
+                />
+              )}
+
+              {currentStep === 5 && (
+                <Step5Projects
+                  stepHeadingRef={stepHeadingRef}
+                  register={register}
+                  projectsArray={projectsArray}
+                  setValue={setValue}
+                  watchedProjects={watchedValues.projects}
+                />
+              )}
+
+              {currentStep === 6 && (
+                <Step6Review
+                  stepHeadingRef={stepHeadingRef}
+                  templateId={templateId}
+                  watchedValues={watchedValues as PortfolioFormValues}
+                  slug={slug}
+                  onSlugChange={setSlug}
+                  slugStatus={slugStatus}
+                  mode={mode}
+                  publishError={publishError}
+                  onRetryPublish={handlePublish}
+                />
+              )}
+
+              {/* Form Navigation Buttons */}
+              <div className="mt-8 pt-5 border-t border-slate-700/60 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={currentStep === 1 || isPublishing}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    currentStep === 1 || isPublishing
+                      ? "opacity-40 cursor-not-allowed text-slate-500"
+                      : "text-slate-300 hover:text-white bg-slate-900 border border-slate-700 hover:bg-slate-800"
+                  }`}
+                >
+                  ← Back
+                </button>
+
+                <div className="flex items-center gap-3">
+                  {currentStep < 6 ? (
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      className="px-5 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all hover:translate-x-0.5"
+                    >
+                      Next Step →
+                    </button>
+                  ) : mode === "create" ? (
+                    <button
+                      type="button"
+                      onClick={handlePublish}
+                      disabled={isPublishing || slugStatus.status !== "available"}
+                      className={`px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg transition-all flex items-center gap-2 ${
+                        isPublishing || slugStatus.status !== "available"
+                          ? "bg-emerald-600/50 cursor-not-allowed opacity-60"
+                          : "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30 hover:scale-[1.02]"
+                      }`}
+                    >
+                      {isPublishing ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Publishing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🚀 Publish Portfolio</span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-amber-400 font-medium">
+                      Editing published portfolios will be available in Phase 8
+                    </span>
+                  )}
+                </div>
+              </div>
+            </form>
+          </section>
+
+          {/* Right Column: Live Preview */}
+          <section
+            className={`h-[680px] sticky top-20 ${
+              mobileTab === "form" ? "hidden md:block" : "block"
+            }`}
+          >
+            <PreviewPane
+              templateId={templateId}
+              previewData={previewState.data}
+              fallbackSections={previewState.fallbackSections}
+            />
+          </section>
+        </main>
+      )}
     </div>
   );
 }

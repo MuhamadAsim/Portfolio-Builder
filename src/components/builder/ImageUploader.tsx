@@ -50,7 +50,7 @@ export function ImageUploader({
           <div className="w-16 h-16 rounded-lg overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/uploads/${encodeURIComponent(value)}`}
+              src={`/uploads/tmp/${encodeURIComponent(value)}`}
               alt="Uploaded preview"
               className="w-full h-full object-cover"
             />

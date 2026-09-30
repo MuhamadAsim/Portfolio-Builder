@@ -40,7 +40,7 @@ prisma/*.db
 prisma/*.db-journal
 
 # user uploads
-uploads/
+/uploads/
 
 # vercel
 .vercel

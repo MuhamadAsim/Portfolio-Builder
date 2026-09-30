@@ -86,6 +86,86 @@ export async function processAndSaveUpload(buffer: Buffer): Promise<ProcessedUpl
   };
 }
 
+export const PORTFOLIO_ID_REGEX = /^[a-zA-Z0-9_-]{1,36}$/;
+
+/**
+ * Validates and resolves the absolute path to a temporary upload file.
+ * Returns null if the filename is invalid or file does not exist.
+ */
+export async function getTmpUploadPath(filename: string): Promise<string | null> {
+  if (!IMAGE_FILENAME_REGEX.test(filename)) {
+    return null;
+  }
+  const filePath = path.join(getTmpUploadsDir(), filename);
+  try {
+    const stat = await fs.stat(filePath);
+    if (stat.isFile()) return filePath;
+  } catch {
+    // File not found
+  }
+  return null;
+}
+
+/**
+ * Validates and resolves the absolute path to a published portfolio upload file.
+ * Returns null if portfolioId/filename is invalid or file does not exist.
+ */
+export async function getPortfolioUploadPath(
+  portfolioId: string,
+  filename: string
+): Promise<string | null> {
+  if (!PORTFOLIO_ID_REGEX.test(portfolioId) || !IMAGE_FILENAME_REGEX.test(filename)) {
+    return null;
+  }
+  const filePath = path.join(getUploadsRoot(), portfolioId, filename);
+  try {
+    const stat = await fs.stat(filePath);
+    if (stat.isFile()) return filePath;
+  } catch {
+    // File not found
+  }
+  return null;
+}
+
+/**
+ * Copies deduplicated image files from uploads/tmp/ to uploads/<portfolioId>/.
+ */
+export async function copyPortfolioUploads(
+  portfolioId: string,
+  filenames: string[]
+): Promise<void> {
+  if (!PORTFOLIO_ID_REGEX.test(portfolioId)) {
+    throw new Error("Invalid portfolioId format");
+  }
+
+  const targetDir = path.join(getUploadsRoot(), portfolioId);
+  await fs.mkdir(targetDir, { recursive: true });
+
+  for (const filename of filenames) {
+    if (!IMAGE_FILENAME_REGEX.test(filename)) {
+      throw new Error(`Invalid image filename format: ${filename}`);
+    }
+    const sourcePath = path.join(getTmpUploadsDir(), filename);
+    const destPath = path.join(targetDir, filename);
+    await fs.copyFile(sourcePath, destPath);
+  }
+}
+
+/**
+ * Recursively removes the uploads/<portfolioId>/ directory (used for rollback on publish failure).
+ */
+export async function removePortfolioUploads(portfolioId: string): Promise<void> {
+  if (!PORTFOLIO_ID_REGEX.test(portfolioId)) {
+    return;
+  }
+  const targetDir = path.join(getUploadsRoot(), portfolioId);
+  try {
+    await fs.rm(targetDir, { recursive: true, force: true });
+  } catch {
+    // Ignore cleanup error
+  }
+}
+
 /**
  * Searches for an uploaded file on disk by filename.
  * Checks uploads/tmp/ first, then scans published portfolio subdirectories.

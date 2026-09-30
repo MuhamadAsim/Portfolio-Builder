@@ -1,0 +1,49 @@
+{
+  "templateId": "template-a",
+  "slug": "elena-cloud",
+  "data": {
+    "basics": {
+      "fullName": "Elena Rostova",
+      "title": "Senior Cloud Architect",
+      "bio": "Designing resilient distributed systems and cloud native architectures across Kubernetes and AWS.",
+      "photo": "7ed09c32-69db-4851-9cad-7fea3f1af18a.webp",
+      "location": "Berlin, Germany",
+      "availability": "Available for cloud consulting"
+    },
+    "contact": {
+      "email": "elena@example.com",
+      "github": "https://github.com/elena",
+      "linkedin": "https://linkedin.com/in/elena"
+    },
+    "skills": [
+      { "name": "Kubernetes", "category": "Cloud" },
+      { "name": "AWS Architecture", "category": "Cloud" },
+      { "name": "Terraform", "category": "DevOps" }
+    ],
+    "experience": [
+      {
+        "company": "CloudScale Systems",
+        "role": "Lead Cloud Architect",
+        "startDate": "2021-04",
+        "description": "Architected multi-region Kubernetes clusters handling 50k requests per second with 99.99% uptime."
+      }
+    ],
+    "education": [
+      {
+        "institution": "Technical University of Munich",
+        "degree": "M.Sc. Computer Science",
+        "startDate": "2015-09",
+        "endDate": "2017-06"
+      }
+    ],
+    "projects": [
+      {
+        "title": "MeshGrid Orchestrator",
+        "description": "Zero-trust service mesh control plane built for high-throughput microservices.",
+        "tags": ["Go", "Kubernetes", "gRPC"],
+        "liveUrl": "https://meshgrid.example.com",
+        "repoUrl": "https://github.com/elena/meshgrid"
+      }
+    ]
+  }
+}

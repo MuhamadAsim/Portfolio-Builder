@@ -45,7 +45,7 @@ describe("Upload API Route (POST /api/upload)", () => {
 
     const json = await res.json();
     expect(json.filename).toMatch(/^[a-f0-9-]{36}\.webp$/);
-    expect(json.url).toBe(`/uploads/${json.filename}`);
+    expect(json.url).toBe(`/uploads/tmp/${json.filename}`);
 
     createdFiles.push(json.filename);
 

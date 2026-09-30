@@ -22,9 +22,14 @@ export function PreviewPane({
   const template = useMemo(() => getTemplate(templateId) || getTemplate("template-a")!, [templateId]);
 
   const htmlDoc = useMemo(() => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const previewAssetBase = origin ? `${origin}/uploads/tmp` : "/uploads/tmp";
+
     return buildHtmlDocument(template, previewData, {
-      assetBase: "/uploads",
+      assetBase: previewAssetBase,
       title: `${previewData.basics.fullName || "Portfolio"} (Preview)`,
+      mode: "preview",
+      previewOrigin: origin,
     });
   }, [template, previewData]);
 

@@ -14,20 +14,24 @@ process.env.UPLOAD_DIR = testUploadsDir;
 const testDbPath = path.join(os.tmpdir(), `pb-test-${crypto.randomUUID()}.db`);
 process.env.DATABASE_URL = `file:${testDbPath}`;
 
-// Initialize SQLite schema in isolated test database
+// Initialize SQLite schema in isolated test database using real migration files
 const db = new Database(testDbPath);
-db.exec(`
-  CREATE TABLE IF NOT EXISTS "Portfolio" (
-      "id" TEXT NOT NULL PRIMARY KEY,
-      "slug" TEXT NOT NULL,
-      "templateId" TEXT NOT NULL,
-      "data" TEXT NOT NULL,
-      "editTokenHash" TEXT NOT NULL,
-      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      "updatedAt" DATETIME NOT NULL
-  );
-  CREATE UNIQUE INDEX IF NOT EXISTS "Portfolio_slug_key" ON "Portfolio"("slug");
-`);
+const migrationsDir = path.resolve(process.cwd(), "prisma", "migrations");
+
+if (fs.existsSync(migrationsDir)) {
+  const migrationDirs = fs
+    .readdirSync(migrationsDir)
+    .sort()
+    .filter((entry) => fs.statSync(path.join(migrationsDir, entry)).isDirectory());
+
+  for (const dir of migrationDirs) {
+    const sqlPath = path.join(migrationsDir, dir, "migration.sql");
+    if (fs.existsSync(sqlPath)) {
+      const sql = fs.readFileSync(sqlPath, "utf-8");
+      db.exec(sql);
+    }
+  }
+}
 db.close();
 
 // Cleanup on test run completion

@@ -1,0 +1,49 @@
+{
+  "templateId": "template-b",
+  "slug": "marcus-chen",
+  "data": {
+    "basics": {
+      "fullName": "Marcus Chen",
+      "title": "Creative Technologist",
+      "bio": "Exploring the boundary between interactive design, generative media, and web technology.",
+      "photo": "75676344-30e0-4c81-96fe-fcc875acdae6.webp",
+      "location": "San Francisco, CA",
+      "availability": "Available for contract roles"
+    },
+    "contact": {
+      "email": "marcus@example.com",
+      "github": "https://github.com/marcus",
+      "website": "https://marcus.design"
+    },
+    "skills": [
+      { "name": "Three.js", "category": "Graphics" },
+      { "name": "WebGL & GLSL", "category": "Graphics" },
+      { "name": "TypeScript", "category": "Languages" }
+    ],
+    "experience": [
+      {
+        "company": "Studio Kinetic",
+        "role": "Lead Creative Developer",
+        "startDate": "2022-01",
+        "description": "Built interactive 3D web experiences, digital installations, and custom shader pipelines."
+      }
+    ],
+    "education": [
+      {
+        "institution": "California College of the Arts",
+        "degree": "BFA Interaction Design",
+        "startDate": "2016-09",
+        "endDate": "2020-05"
+      }
+    ],
+    "projects": [
+      {
+        "title": "Aura Shader Lab",
+        "description": "Real-time generative shader experiments and interactive procedural audio visualizer.",
+        "tags": ["WebGL", "GLSL", "Web Audio"],
+        "liveUrl": "https://aura.example.com",
+        "repoUrl": "https://github.com/marcus/aura"
+      }
+    ]
+  }
+}

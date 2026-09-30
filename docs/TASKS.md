@@ -43,11 +43,11 @@ Mark tasks `[x]` as they are completed.
 - [x] Slug field with debounced availability check.
 
 ## Phase 6 — Publish and view
-- [ ] `POST /api/portfolios`: validate, create, return slug + one-time edit token.
-- [ ] Success screen: live URL, Download ZIP button, edit token with copy button + warning.
-- [ ] `/p/[slug]` and `_sites/[slug]` pages, plus subdomain rewrite in middleware/proxy.
-- [ ] Verify `http://<slug>.localhost:3000` in Chrome and the `/p/<slug>` fallback.
-- [ ] 404 page for unknown slugs.
+- [x] `POST /api/portfolios`: validate, create, return slug + one-time edit token.
+- [x] Success screen: live URL, Download ZIP button, edit token with copy button + warning.
+- [x] `/p/[slug]` and `_sites/[slug]` pages, plus subdomain rewrite in middleware/proxy.
+- [x] Verify `http://<slug>.localhost:3000` in Chrome and the `/p/<slug>` fallback.
+- [x] 404 page for unknown slugs.
 
 ## Phase 7 — Export
 - [ ] `GET /api/portfolios/[slug]/export` → ZIP (`index.html`, `styles.css`, `assets/`,
