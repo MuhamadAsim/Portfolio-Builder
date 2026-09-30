@@ -1,42 +1,19 @@
+import { createMobileNavScript, createScrollTopScript } from "../shared/scripts";
+
 /**
- * Tiny vanilla client-side interaction script (< 1.5 KB).
- * Statically compiled, zero runtime dependencies, zero user data interpolation.
+ * Template A client interaction script.
+ * Bundles shared mobile navigation and scroll-to-top helpers with project tag filtering.
+ * Statically constructed, < 1.5 KB total, zero user data.
  */
 export const templateAScript = `
+${createMobileNavScript("tpl-a")}
+${createScrollTopScript("tpl-a")}
+
 (function() {
-  var toggle = document.querySelector('.tpl-a .tpl-nav-toggle');
-  var mobileMenu = document.querySelector('.tpl-a .tpl-mobile-menu');
-  if (toggle && mobileMenu) {
-    toggle.addEventListener('click', function() {
-      var isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', String(!isExpanded));
-      mobileMenu.classList.toggle('is-open', !isExpanded);
-    });
-    var navLinks = mobileMenu.querySelectorAll('a');
-    for (var i = 0; i < navLinks.length; i++) {
-      navLinks[i].addEventListener('click', function() {
-        toggle.setAttribute('aria-expanded', 'false');
-        mobileMenu.classList.remove('is-open');
-      });
-    }
-  }
-
-  var topBtn = document.querySelector('.tpl-a .tpl-scroll-top');
-  if (topBtn) {
-    window.addEventListener('scroll', function() {
-      if (window.scrollY > 300) {
-        topBtn.classList.add('is-visible');
-      } else {
-        topBtn.classList.remove('is-visible');
-      }
-    });
-    topBtn.addEventListener('click', function() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-
-  var filterBtns = document.querySelectorAll('.tpl-a .tpl-filter-btn');
-  var projectCards = document.querySelectorAll('.tpl-a .tpl-project-card');
+  var root = document.querySelector('.tpl-a');
+  if (!root) return;
+  var filterBtns = root.querySelectorAll('.tpl-filter-btn');
+  var projectCards = root.querySelectorAll('.tpl-project-card');
   if (filterBtns.length > 0 && projectCards.length > 0) {
     for (var j = 0; j < filterBtns.length; j++) {
       filterBtns[j].addEventListener('click', function(e) {

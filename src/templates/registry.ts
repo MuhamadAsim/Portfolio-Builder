@@ -1,8 +1,10 @@
 import type { PortfolioTemplate } from "./types";
 import { templateA } from "./template-a";
+import { templateB } from "./template-b";
 
 const templates: Record<string, PortfolioTemplate> = {
   "template-a": templateA,
+  "template-b": templateB,
 };
 
 export function getTemplate(id: string): PortfolioTemplate | undefined {

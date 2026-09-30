@@ -32,7 +32,7 @@ Mark tasks `[x]` as they are completed.
       checklist (minimal / maximal / XSS / responsive).
 
 ## Phase 4 — Template B
-- [ ] Port reference B into `src/templates/template-b/` with the same contract and checks.
+- [x] Port reference B into `src/templates/template-b/` with the same contract and checks.
 
 ## Phase 5 — Builder UI
 - [ ] Home page with both template cards and previews.
