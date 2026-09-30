@@ -247,6 +247,34 @@ export const templateACss = `
   gap: 1rem;
 }
 
+.tpl-a .tpl-hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tpl-a .tpl-availability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: var(--tpl-radius-full);
+}
+
+.tpl-a .tpl-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px #d1fae5;
+}
+
 .tpl-a .tpl-hero-title {
   font-size: 3.25rem;
   font-weight: 900;

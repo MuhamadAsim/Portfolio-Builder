@@ -53,4 +53,29 @@ describe("Template B Specific Features (Neo-Pop)", () => {
     expect(markup).toContain('class="tpl-polaroid-card"');
     expect(markup).toContain('class="tpl-polaroid-inner"');
   });
+
+  it("renders availability indicator when basics.availability is set", () => {
+    const dataWithAvailability = {
+      ...samplePortfolioData,
+      basics: {
+        ...samplePortfolioData.basics,
+        availability: "Accepting select client projects",
+      },
+    };
+    const markup = renderToStaticMarkup(templateB.render(dataWithAvailability, opts));
+    expect(markup).toContain('class="tpl-availability-pill"');
+    expect(markup).toContain("Accepting select client projects");
+  });
+
+  it("omits availability indicator when basics.availability is undefined", () => {
+    const dataWithoutAvailability = {
+      ...samplePortfolioData,
+      basics: {
+        ...samplePortfolioData.basics,
+        availability: undefined,
+      },
+    };
+    const markup = renderToStaticMarkup(templateB.render(dataWithoutAvailability, opts));
+    expect(markup).not.toContain('class="tpl-availability-pill"');
+  });
 });

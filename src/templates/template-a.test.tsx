@@ -34,4 +34,29 @@ describe("Template A Specific Features (Clean Modern)", () => {
     const markup = renderToStaticMarkup(templateA.render(dataWithoutTags, opts));
     expect(markup).not.toContain('class="tpl-filter-row"');
   });
+
+  it("renders availability indicator when basics.availability is set", () => {
+    const dataWithAvailability = {
+      ...samplePortfolioData,
+      basics: {
+        ...samplePortfolioData.basics,
+        availability: "Available for freelance design",
+      },
+    };
+    const markup = renderToStaticMarkup(templateA.render(dataWithAvailability, opts));
+    expect(markup).toContain('class="tpl-availability-badge"');
+    expect(markup).toContain("Available for freelance design");
+  });
+
+  it("omits availability indicator when basics.availability is undefined", () => {
+    const dataWithoutAvailability = {
+      ...samplePortfolioData,
+      basics: {
+        ...samplePortfolioData.basics,
+        availability: undefined,
+      },
+    };
+    const markup = renderToStaticMarkup(templateA.render(dataWithoutAvailability, opts));
+    expect(markup).not.toContain('class="tpl-availability-badge"');
+  });
 });

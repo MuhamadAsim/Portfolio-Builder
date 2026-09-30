@@ -131,6 +131,29 @@ describe("portfolioDataSchema", () => {
     };
     expect(() => portfolioDataSchema.parse(maxProjects)).not.toThrow();
   });
+
+  it("accepts valid availability string and trims whitespace", () => {
+    const dataWithAvailability = {
+      ...minimalValidData,
+      basics: {
+        ...minimalValidData.basics,
+        availability: "  Available for freelance projects  ",
+      },
+    };
+    const parsed = portfolioDataSchema.parse(dataWithAvailability);
+    expect(parsed.basics.availability).toBe("Available for freelance projects");
+  });
+
+  it("rejects availability exceeding 100 characters", () => {
+    const dataWithTooLongAvailability = {
+      ...minimalValidData,
+      basics: {
+        ...minimalValidData.basics,
+        availability: "A".repeat(101),
+      },
+    };
+    expect(() => portfolioDataSchema.parse(dataWithTooLongAvailability)).toThrow();
+  });
 });
 
 describe("createPortfolioSchema", () => {

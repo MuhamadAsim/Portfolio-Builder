@@ -169,6 +169,14 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
             <div className="tpl-hero-grid">
               {/* Left Column: Typography & CTAs */}
               <div>
+                {basics.availability && (
+                  <div className="tpl-availability-wrap">
+                    <span className="tpl-availability-pill">
+                      <span className="tpl-availability-dot" aria-hidden="true" />
+                      <span>{basics.availability}</span>
+                    </span>
+                  </div>
+                )}
                 <div className="tpl-hero-greeting">Hi there, I&apos;m</div>
                 <h1 className="tpl-hero-headline">{basics.fullName}</h1>
                 <div className="tpl-hero-role">{basics.title}</div>

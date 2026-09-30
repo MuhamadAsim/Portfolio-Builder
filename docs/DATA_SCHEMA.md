@@ -50,6 +50,7 @@ export const portfolioDataSchema = z.object({
     title: z.string().min(2).max(100),
     bio: z.string().min(10).max(600),
     bioQuote: z.string().max(200).optional(),
+    availability: z.string().trim().max(100).optional(),
     location: z.string().max(80).optional(),
     photo: z.string().optional(),      // stored filename
   }),

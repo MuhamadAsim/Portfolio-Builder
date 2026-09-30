@@ -364,6 +364,53 @@ export const templateBCss = `
   }
 }
 
+.tpl-b .tpl-availability-wrap {
+  margin-bottom: 0.75rem;
+}
+
+.tpl-b .tpl-availability-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #064e3b;
+  background: #a7f3d0;
+  border: 2px solid var(--tpl-b-border);
+  box-shadow: var(--tpl-b-shadow-sm);
+  border-radius: var(--tpl-b-radius-full);
+}
+
+.tpl-b[data-theme="dark"] .tpl-availability-pill {
+  color: #ecfdf5;
+  background: #064e3b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tpl-b:not([data-theme="light"]) .tpl-availability-pill {
+    color: #ecfdf5;
+    background: #064e3b;
+  }
+}
+
+.tpl-b .tpl-availability-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #047857;
+}
+
+.tpl-b[data-theme="dark"] .tpl-availability-dot {
+  background: #34d399;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tpl-b:not([data-theme="light"]) .tpl-availability-dot {
+    background: #34d399;
+  }
+}
+
 .tpl-b .tpl-hero-greeting {
   font-size: 1.5rem;
   font-weight: 900;

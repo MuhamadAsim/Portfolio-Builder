@@ -53,22 +53,23 @@ export interface PortfolioTemplate {
   previewImage: string;
   /** Pure: same input -> same output. No fetching, no DB, no browser APIs. */
   render(data: PortfolioData, opts: { assetBase: string }): React.ReactElement;
-  /** Absolute path to the template's compiled/plain CSS file. */
-  cssPath: string;
+  /** In-memory plain scoped CSS string. Works for server pages, iframe srcDoc, and ZIP export. */
+  css: string;
 }
 ```
 Rules for templates:
 - Output must be static HTML. Interactivity (mobile menu, dark-mode toggle, smooth scroll) uses
   a tiny inline vanilla `<script>` — no React hydration required on generated pages.
-- Styling is a **plain CSS file per template**, not Tailwind, so the export can ship it as-is.
+- Styling is a **plain CSS string per template**, not Tailwind, so the export can ship it as-is.
 - Images are referenced via `assetBase` (`/uploads/...` live, `./assets/...` in the ZIP).
 - Never use `dangerouslySetInnerHTML` with user data. Escape everything.
 - Handle missing optional sections gracefully (hide the section, don't render empty headings).
 
 ## Rendering
-- **Live/published:** a Server Component loads the row from SQLite, validates `data` with Zod,
-  calls `template.render(data, { assetBase: '/uploads' })`, and wraps it in a minimal HTML shell
-  with the template CSS linked.
+- **Live/published:** served by a route handler returning a full static HTML string (not a React
+  Server Component), so client interaction scripts run naturally without React hydration overhead,
+  and the exact same static HTML string is reused for ZIP export. Note: A Content Security Policy (CSP)
+  header is planned for Phase 6.
 - **Preview:** the builder calls the same `render` on the client-side form state (render is pure,
   so it is safe in both environments). Show it in an `<iframe srcDoc>` to isolate template CSS
   from app CSS.

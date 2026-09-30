@@ -145,7 +145,15 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
           <div className="tpl-container">
             <div className="tpl-hero-grid">
               <div className="tpl-hero-text">
-                <span className="tpl-badge">Portfolio</span>
+                <div className="tpl-hero-meta-row">
+                  <span className="tpl-badge">Portfolio</span>
+                  {basics.availability && (
+                    <span className="tpl-availability-badge">
+                      <span className="tpl-status-dot" aria-hidden="true" />
+                      <span>{basics.availability}</span>
+                    </span>
+                  )}
+                </div>
                 <h1 className="tpl-hero-title">{basics.fullName}</h1>
                 <p className="tpl-hero-role">{basics.title}</p>
                 <p className="tpl-hero-bio">{basics.bio}</p>
