@@ -50,9 +50,9 @@ Mark tasks `[x]` as they are completed.
 - [x] 404 page for unknown slugs.
 
 ## Phase 7 — Export
-- [ ] `GET /api/portfolios/[slug]/export` → ZIP (`index.html`, `styles.css`, `assets/`,
+- [x] `GET /api/portfolios/[slug]/export` → ZIP (`index.html`, `styles.css`, `assets/`,
       `README.txt` with Netlify / GitHub Pages / Vercel steps).
-- [ ] Test: unzip, open `index.html` offline, compare visually to the live page.
+- [x] Test: unzip, open `index.html` offline, compare visually to the live page.
 
 ## Phase 8 — Edit and delete
 - [ ] `/edit` page: slug + token → load data into the form.

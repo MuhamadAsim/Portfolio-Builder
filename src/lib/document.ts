@@ -19,6 +19,7 @@ export interface BuildHtmlOptions extends RenderOptions {
   title?: string;
   mode?: "preview" | "published";
   previewOrigin?: string;
+  externalStylesheet?: string;
 }
 
 /**
@@ -91,15 +92,17 @@ export function buildHtmlDocumentWithHashes(
     ? `  <meta http-equiv="Content-Security-Policy" content="${escapeHtml(cspHeader)}" />\n`
     : "";
 
+  const stylesheetTag = opts.externalStylesheet
+    ? `  <link rel="stylesheet" href="${escapeHtml(opts.externalStylesheet)}" />`
+    : `  <style>\n${template.css}\n  </style>`;
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 ${metaCsp}  <title>${pageTitle}</title>
-  <style>
-${template.css}
-  </style>
+${stylesheetTag}
 </head>
 <body>
 ${markup}

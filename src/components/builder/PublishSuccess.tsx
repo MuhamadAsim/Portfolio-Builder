@@ -177,18 +177,16 @@ export function PublishSuccess({
 
       {/* Export & Actions */}
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-700/60">
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-slate-800 text-slate-400 text-xs font-semibold border border-slate-700 cursor-not-allowed opacity-60 flex items-center justify-center gap-2"
-          title="Static ZIP export will be available in Phase 7"
+        <a
+          href={`/api/portfolios/${encodeURIComponent(slug)}/export`}
+          download={`${slug}-portfolio.zip`}
+          className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 hover:translate-y-[-1px]"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          <span>Download ZIP (Coming Soon)</span>
-        </button>
+          <span>Download Static ZIP</span>
+        </a>
 
         <Link
           href="/"
