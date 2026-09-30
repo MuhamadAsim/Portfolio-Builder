@@ -6,7 +6,7 @@ import {
   processAndSaveUpload,
   findUploadFile,
   cleanupOldTmpUploads,
-  TMP_UPLOADS_DIR,
+  getTmpUploadsDir,
   MAX_UPLOAD_SIZE,
 } from "./images";
 
@@ -39,7 +39,7 @@ describe("Image processing and storage (src/lib/images)", () => {
     createdFiles.push(result.filepath);
 
     expect(result.filename).toMatch(/^[a-f0-9-]{36}\.webp$/);
-    expect(result.filepath).toBe(path.join(TMP_UPLOADS_DIR, result.filename));
+    expect(result.filepath).toBe(path.join(getTmpUploadsDir(), result.filename));
     expect(result.size).toBeGreaterThan(0);
 
     // Verify saved file is valid WebP with Sharp

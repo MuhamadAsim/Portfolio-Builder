@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
+import { useImageUpload } from "./hooks/useImageUpload";
 
 interface ImageUploaderProps {
   id: string;
@@ -17,53 +18,25 @@ export function ImageUploader({
   onChange,
   helperText = "JPEG, PNG, or WebP up to 2 MB.",
 }: ImageUploaderProps) {
-  const [isUploading, setIsUploading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const { uploadFile, isUploading, errorMsg, clearError } = useImageUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setErrorMsg(null);
-
-    // 1. Client-side size check
-    if (file.size > 2 * 1024 * 1024) {
-      setErrorMsg("File exceeds the maximum allowed size of 2 MB.");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
+    const uploadedFilename = await uploadFile(file);
+    if (uploadedFilename) {
+      onChange(uploadedFilename);
     }
-
-    setIsUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to upload image.");
-      }
-
-      onChange(data.filename);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Upload failed.";
-      setErrorMsg(msg);
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
   const handleRemove = () => {
     onChange(undefined);
-    setErrorMsg(null);
+    clearError();
   };
 
   return (

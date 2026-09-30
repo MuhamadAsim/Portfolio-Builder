@@ -4,7 +4,7 @@ import { POST } from "./route";
 import sharp from "sharp";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { TMP_UPLOADS_DIR, MAX_UPLOAD_SIZE } from "@/lib/images";
+import { getTmpUploadsDir, MAX_UPLOAD_SIZE } from "@/lib/images";
 
 describe("Upload API Route (POST /api/upload)", () => {
   const createdFiles: string[] = [];
@@ -12,7 +12,7 @@ describe("Upload API Route (POST /api/upload)", () => {
   afterAll(async () => {
     for (const f of createdFiles) {
       try {
-        await fs.unlink(path.join(TMP_UPLOADS_DIR, f));
+        await fs.unlink(path.join(getTmpUploadsDir(), f));
       } catch {
         // Ignore
       }
@@ -50,7 +50,7 @@ describe("Upload API Route (POST /api/upload)", () => {
     createdFiles.push(json.filename);
 
     // Verify file exists in tmp dir
-    const stat = await fs.stat(path.join(TMP_UPLOADS_DIR, json.filename));
+    const stat = await fs.stat(path.join(getTmpUploadsDir(), json.filename));
     expect(stat.isFile()).toBe(true);
   });
 

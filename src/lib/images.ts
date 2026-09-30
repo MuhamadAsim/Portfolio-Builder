@@ -9,14 +9,24 @@ export const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp"]);
 export const MAX_IMAGE_DIMENSION = 1600;
 export const LIMIT_INPUT_PIXELS = 25_000_000;
 
-export const UPLOADS_ROOT = path.resolve(process.cwd(), "uploads");
-export const TMP_UPLOADS_DIR = path.join(UPLOADS_ROOT, "tmp");
+export function getUploadsRoot(): string {
+  return process.env.UPLOAD_DIR
+    ? path.resolve(process.cwd(), process.env.UPLOAD_DIR)
+    : path.resolve(process.cwd(), "uploads");
+}
+
+export function getTmpUploadsDir(): string {
+  return path.join(getUploadsRoot(), "tmp");
+}
+
+export const UPLOADS_ROOT = getUploadsRoot();
+export const TMP_UPLOADS_DIR = getTmpUploadsDir();
 
 /**
  * Ensures the uploads/tmp directory exists on disk.
  */
 export async function ensureUploadDirs(): Promise<void> {
-  await fs.mkdir(TMP_UPLOADS_DIR, { recursive: true });
+  await fs.mkdir(getTmpUploadsDir(), { recursive: true });
 }
 
 export interface ProcessedUpload {
@@ -65,7 +75,7 @@ export async function processAndSaveUpload(buffer: Buffer): Promise<ProcessedUpl
     .toBuffer();
 
   const filename = `${crypto.randomUUID()}.webp`;
-  const filepath = path.join(TMP_UPLOADS_DIR, filename);
+  const filepath = path.join(getTmpUploadsDir(), filename);
 
   await fs.writeFile(filepath, processedBuffer);
 
@@ -85,8 +95,11 @@ export async function findUploadFile(filename: string): Promise<string | null> {
     return null;
   }
 
+  const tmpUploadsDir = getTmpUploadsDir();
+  const uploadsRoot = getUploadsRoot();
+
   // 1. Check uploads/tmp/<filename>
-  const tmpPath = path.join(TMP_UPLOADS_DIR, filename);
+  const tmpPath = path.join(tmpUploadsDir, filename);
   try {
     const stat = await fs.stat(tmpPath);
     if (stat.isFile()) return tmpPath;
@@ -96,10 +109,10 @@ export async function findUploadFile(filename: string): Promise<string | null> {
 
   // 2. Check uploads/<portfolioId>/<filename>
   try {
-    const entries = await fs.readdir(UPLOADS_ROOT, { withFileTypes: true });
+    const entries = await fs.readdir(uploadsRoot, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.isDirectory() && entry.name !== "tmp") {
-        const candidate = path.join(UPLOADS_ROOT, entry.name, filename);
+        const candidate = path.join(uploadsRoot, entry.name, filename);
         try {
           const stat = await fs.stat(candidate);
           if (stat.isFile()) return candidate;
@@ -125,11 +138,12 @@ export async function cleanupOldTmpUploads(
 
   try {
     await ensureUploadDirs();
-    const files = await fs.readdir(TMP_UPLOADS_DIR);
+    const tmpUploadsDir = getTmpUploadsDir();
+    const files = await fs.readdir(tmpUploadsDir);
     const now = Date.now();
 
     for (const file of files) {
-      const filePath = path.join(TMP_UPLOADS_DIR, file);
+      const filePath = path.join(tmpUploadsDir, file);
       try {
         const stat = await fs.stat(filePath);
         if (stat.isFile() && now - stat.mtimeMs > maxAgeMs) {

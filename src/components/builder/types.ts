@@ -36,3 +36,10 @@ export const STEP_NAMES = [
   "Featured Projects",
   "Review & Summary",
 ] as const;
+
+export interface BuilderAppProps {
+  mode?: "create" | "edit";
+  initialData?: PortfolioFormValues;
+  initialSlug?: string;
+  initialTemplateId?: "template-a" | "template-b";
+}
