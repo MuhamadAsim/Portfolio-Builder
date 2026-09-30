@@ -24,6 +24,7 @@ Mark tasks `[x]` as they are completed.
 - [x] `slug.ts` (validation + reserved words), `tokens.ts` (generate/hash/verify).
 - [x] Unit tests for slug rules, token hashing, and schema edge cases.
 
+
 ## Phase 3 — Template A
 - [x] Define the template contract and registry.
 - [x] Create sample data.
@@ -35,11 +36,11 @@ Mark tasks `[x]` as they are completed.
 - [x] Port reference B into `src/templates/template-b/` with the same contract and checks.
 
 ## Phase 5 — Builder UI
-- [ ] Home page with both template cards and previews.
-- [ ] Multi-step form (React Hook Form + shared Zod schema), add/remove list items.
-- [ ] Image upload endpoint + client component (validation, sharp re-encode, size limit).
-- [ ] Live preview via `<iframe srcDoc>` using the chosen template's `render`.
-- [ ] Slug field with debounced availability check.
+- [x] Home page with both template cards and previews.
+- [x] Multi-step form (React Hook Form + shared Zod schema), add/remove list items.
+- [x] Image upload endpoint + client component (validation, sharp re-encode, size limit).
+- [x] Live preview via `<iframe srcDoc>` using the chosen template's `render`.
+- [x] Slug field with debounced availability check.
 
 ## Phase 6 — Publish and view
 - [ ] `POST /api/portfolios`: validate, create, return slug + one-time edit token.

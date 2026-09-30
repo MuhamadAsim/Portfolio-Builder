@@ -9,7 +9,7 @@ export const maximalFixture: PortfolioData = {
     bioQuote:
       "Simplicity is prerequisite for reliability, and elegant software architecture enables velocity.",
     location: "San Francisco, California, United States",
-    photo: "photo-alexandria.webp",
+    photo: "00000000-0000-4000-8000-000000000099.webp",
   },
   contact: {
     email: "alexandria.constantine@example.com",
@@ -47,6 +47,6 @@ export const maximalFixture: PortfolioData = {
     tags: ["Rust", "TypeScript", "Kafka", "Docker", "gRPC", "Prometheus"],
     liveUrl: "https://demo.example.com/project-stream",
     repoUrl: "https://github.com/example-alexandria/project-stream",
-    image: `project-preview-${i + 1}.webp`,
+    image: `00000000-0000-4000-8000-${String(i + 1).padStart(12, "0")}.webp`,
   })),
 };

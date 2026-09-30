@@ -14,7 +14,7 @@ export const xssTextFixture: PortfolioData = {
     bio: `Bio content with <script>alert('xss-bio')</script> and <b>bold tags</b> & special "quotes" & ampersands.`,
     bioQuote: `Quote with <script>alert('xss-quote')</script>`,
     location: `City <script>alert('xss-loc')</script>`,
-    photo: `photo-probe.png`,
+    photo: "00000000-0000-4000-8000-000000000066.webp",
   },
   contact: {
     email: "xss-tester@example.com",
@@ -57,7 +57,7 @@ export const xssTextFixture: PortfolioData = {
       tags: [`Tag <script>alert('xss-tag')</script>`],
       liveUrl: "https://example.com/live",
       repoUrl: "https://example.com/repo",
-      image: "probe.png",
+      image: "00000000-0000-4000-8000-000000000077.webp",
     },
   ],
 };

@@ -154,6 +154,49 @@ describe("portfolioDataSchema", () => {
     };
     expect(() => portfolioDataSchema.parse(dataWithTooLongAvailability)).toThrow();
   });
+
+  it("accepts valid 36-char uuid .webp image filenames", () => {
+    const dataWithValidImage = {
+      ...minimalValidData,
+      basics: {
+        ...minimalValidData.basics,
+        photo: "12345678-1234-1234-1234-123456789abc.webp",
+      },
+      projects: [
+        {
+          title: "Project 1",
+          description: "Desc",
+          tags: ["Tech"],
+          image: "87654321-4321-4321-4321-cba987654321.webp",
+        },
+      ],
+    };
+    const parsed = portfolioDataSchema.parse(dataWithValidImage);
+    expect(parsed.basics.photo).toBe("12345678-1234-1234-1234-123456789abc.webp");
+    expect(parsed.projects[0].image).toBe("87654321-4321-4321-4321-cba987654321.webp");
+  });
+
+  it("rejects non-uuid, non-webp, or path traversal image filenames", () => {
+    const invalidImages = [
+      "profile.png",
+      "profile.webp",
+      "../hack.webp",
+      "/uploads/12345678-1234-1234-1234-123456789abc.webp",
+      "12345678-1234-1234-1234-123456789abc.png",
+      "1234.webp",
+    ];
+
+    for (const badImg of invalidImages) {
+      const dataWithBadImg = {
+        ...minimalValidData,
+        basics: {
+          ...minimalValidData.basics,
+          photo: badImg,
+        },
+      };
+      expect(() => portfolioDataSchema.parse(dataWithBadImg)).toThrow();
+    }
+  });
 });
 
 describe("createPortfolioSchema", () => {

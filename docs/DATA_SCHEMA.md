@@ -12,6 +12,7 @@ const httpsUrl = z.string().url().refine((u) => u.startsWith('https://'), 'Must 
 const optionalUrl = httpsUrl.optional().or(z.literal('').transform(() => undefined));
 
 export const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{1,28})[a-z0-9]$/; // 3–30 chars
+export const IMAGE_FILENAME_REGEX = /^[a-f0-9-]{36}\.webp$/; // 36-char uuid + .webp
 
 export const projectSchema = z.object({
   title: z.string().min(1).max(80),
@@ -19,7 +20,7 @@ export const projectSchema = z.object({
   tags: z.array(z.string().min(1).max(30)).max(10).default([]),
   liveUrl: optionalUrl,
   repoUrl: optionalUrl,
-  image: z.string().optional(),        // stored filename, not a URL
+  image: z.string().regex(IMAGE_FILENAME_REGEX).optional(), // stored uuid.webp filename
 });
 
 export const experienceSchema = z.object({
@@ -52,7 +53,7 @@ export const portfolioDataSchema = z.object({
     bioQuote: z.string().max(200).optional(),
     availability: z.string().trim().max(100).optional(),
     location: z.string().max(80).optional(),
-    photo: z.string().optional(),      // stored filename
+    photo: z.string().regex(IMAGE_FILENAME_REGEX).optional(), // stored uuid.webp filename
   }),
   contact: z.object({
     email: z.string().email(),

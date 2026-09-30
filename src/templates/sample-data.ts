@@ -12,7 +12,7 @@ export const samplePortfolioData: PortfolioData = {
     bioQuote:
       "Crafting clean code and intuitive digital experiences with purpose and attention to detail.",
     location: "Austin, Texas",
-    photo: "sample-profile.png",
+    photo: "00000000-0000-4000-8000-000000000001.webp",
   },
   contact: {
     email: "jordan.vance@example.com",
@@ -77,7 +77,7 @@ export const samplePortfolioData: PortfolioData = {
       tags: ["Next.js", "Python", "FastAPI", "Vector DB"],
       liveUrl: "https://omnisearch.example.com",
       repoUrl: "https://github.com/example-jordan/omnisearch",
-      image: "project-omnisearch.png",
+      image: "00000000-0000-4000-8000-000000000002.webp",
     },
     {
       title: "PulseFlow Analytics Dashboard",
@@ -86,7 +86,7 @@ export const samplePortfolioData: PortfolioData = {
       tags: ["React", "TypeScript", "PostgreSQL", "Tailwind"],
       liveUrl: "https://pulseflow.example.com",
       repoUrl: "https://github.com/example-jordan/pulseflow",
-      image: "project-pulseflow.png",
+      image: "00000000-0000-4000-8000-000000000003.webp",
     },
     {
       title: "CartCraft E-Commerce Store",
@@ -95,7 +95,7 @@ export const samplePortfolioData: PortfolioData = {
       tags: ["Next.js", "TypeScript", "Stripe API", "Node.js"],
       liveUrl: "https://cartcraft.example.com",
       repoUrl: "https://github.com/example-jordan/cartcraft",
-      image: "project-cartcraft.png",
+      image: "00000000-0000-4000-8000-000000000004.webp",
     },
   ],
 };

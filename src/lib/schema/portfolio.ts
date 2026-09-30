@@ -10,6 +10,13 @@ export const optionalUrl = httpsUrl
   .or(z.literal("").transform(() => undefined));
 
 export const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{1,28})[a-z0-9]$/; // 3–30 chars
+export const IMAGE_FILENAME_REGEX = /^[a-f0-9-]{36}\.webp$/; // 36-char uuid + .webp
+
+export const imageFilenameSchema = z
+  .string()
+  .regex(IMAGE_FILENAME_REGEX, "Image must be a valid 36-character UUID .webp filename")
+  .optional()
+  .or(z.literal("").transform(() => undefined));
 
 export const projectSchema = z.object({
   title: z.string().min(1).max(80),
@@ -17,7 +24,7 @@ export const projectSchema = z.object({
   tags: z.array(z.string().min(1).max(30)).max(10).default([]),
   liveUrl: optionalUrl,
   repoUrl: optionalUrl,
-  image: z.string().optional(), // stored filename, not a URL
+  image: imageFilenameSchema,
 });
 
 export const experienceSchema = z.object({
@@ -42,25 +49,29 @@ export const skillSchema = z.object({
   category: z.string().max(40).optional(), // e.g. "Frontend"
 });
 
+export const basicsSchema = z.object({
+  fullName: z.string().min(2).max(80),
+  title: z.string().min(2).max(100),
+  bio: z.string().min(10).max(600),
+  bioQuote: z.string().max(200).optional(),
+  availability: z.string().trim().max(100).optional(),
+  location: z.string().max(80).optional(),
+  photo: imageFilenameSchema,
+});
+
+export const contactSchema = z.object({
+  email: z.string().email(),
+  phone: z.string().max(30).optional(),
+  github: optionalUrl,
+  linkedin: optionalUrl,
+  twitter: optionalUrl,
+  website: optionalUrl,
+  resumeUrl: optionalUrl,
+});
+
 export const portfolioDataSchema = z.object({
-  basics: z.object({
-    fullName: z.string().min(2).max(80),
-    title: z.string().min(2).max(100),
-    bio: z.string().min(10).max(600),
-    bioQuote: z.string().max(200).optional(),
-    availability: z.string().trim().max(100).optional(),
-    location: z.string().max(80).optional(),
-    photo: z.string().optional(), // stored filename
-  }),
-  contact: z.object({
-    email: z.string().email(),
-    phone: z.string().max(30).optional(),
-    github: optionalUrl,
-    linkedin: optionalUrl,
-    twitter: optionalUrl,
-    website: optionalUrl,
-    resumeUrl: optionalUrl,
-  }),
+  basics: basicsSchema,
+  contact: contactSchema,
   skills: z.array(skillSchema).max(30).default([]),
   experience: z.array(experienceSchema).max(10).default([]),
   education: z.array(educationSchema).max(6).default([]),
