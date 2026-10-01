@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
-import type { PortfolioData } from "@/lib/schema/portfolio";
+import type { PortfolioData, Project } from "@/lib/schema/portfolio";
 import type { PortfolioTemplate, RenderOptions } from "../types";
 import { templateBCss } from "./styles";
 import { templateBEarlyScript, templateBScript } from "./script";
@@ -30,6 +30,13 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
   const hasProjects = projects && projects.length > 0;
   const hasExperience = experience && experience.length > 0;
   const hasEducation = education && education.length > 0;
+
+  // Extract unique tags across projects for dynamic filter
+  const allProjectTags = Array.from(
+    new Set(
+      projects.flatMap((p: Project) => p.tags || []).map((t) => t.trim())
+    )
+  ).filter(Boolean);
 
   const safeResumeUrl = sanitizeHref(contact.resumeUrl);
   const safeGithub = sanitizeHref(contact.github);
@@ -166,9 +173,9 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         {/* ── Hero Section ──────────────────────────────────────────────── */}
         <section id="hero" className="tpl-section">
           <div className="tpl-container">
-            <div className="tpl-hero-grid">
+            <div className={`tpl-hero-grid ${basics.photo ? "" : "is-centered"}`}>
               {/* Left Column: Typography & CTAs */}
-              <div>
+              <div className="tpl-b-reveal">
                 {basics.availability && (
                   <div className="tpl-availability-wrap">
                     <span className="tpl-availability-pill">
@@ -203,7 +210,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
               </div>
 
               {/* Right Column: Polaroid Photo Card with Tape Sticker */}
-              <div className="tpl-polaroid-col">
+              <div className="tpl-polaroid-col tpl-b-reveal">
                 <div className="tpl-polaroid-wrap">
                   {/* Tape sticker text derived from basics.title, not hardcoded */}
                   {basics.title && (
@@ -228,6 +235,80 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                           <AvatarPlaceholder />
                         </div>
                       )}
+                      <div className="tpl-polaroid-orb" aria-hidden="true">
+                        <span />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* PART 2: Notebook Entry #01 Card (Eliminates Blank Space between Hero & Sections) */}
+            <div className="tpl-notebook-card tpl-b-reveal">
+              <div className="tpl-notebook-top-badge">
+                <div className="tpl-notebook-pill">
+                  <SparklesIcon />
+                  <span>Notebook Entry #01</span>
+                </div>
+              </div>
+
+              <div className="tpl-notebook-grid">
+                {/* Left: Terminal Code Mock */}
+                <div className="tpl-terminal-box">
+                  <div className="tpl-terminal-header">
+                    <div className="tpl-terminal-dots">
+                      <span className="tpl-dot-red" />
+                      <span className="tpl-dot-yellow" />
+                      <span className="tpl-dot-green" />
+                    </div>
+                    <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--tpl-b-muted)" }}>
+                      terminal.ts
+                    </span>
+                  </div>
+
+                  <div className="tpl-terminal-code">
+                    <div>
+                      <span className="tpl-code-purple">const</span> creator = &#123;
+                    </div>
+                    <div style={{ paddingLeft: "1rem" }}>
+                      name: <span className="tpl-code-green">&quot;{basics.fullName}&quot;</span>,
+                    </div>
+                    {basics.title && (
+                      <div style={{ paddingLeft: "1rem" }}>
+                        role: <span className="tpl-code-amber">&quot;{basics.title}&quot;</span>,
+                      </div>
+                    )}
+                    <div style={{ paddingLeft: "1rem" }}>
+                      status: <span className="tpl-code-green">&quot;{basics.availability || "Building Digital Magic"}&quot;</span>
+                    </div>
+                    <div>&#125;;</div>
+                  </div>
+
+                  <div className="tpl-terminal-footer">
+                    <span>{"/// CRAFTING CODE ///"}</span>
+                    <span>✦ ACTIVE</span>
+                  </div>
+                </div>
+
+                {/* Right: Narrative Story + Sticky Note Badges */}
+                <div>
+                  <h3 style={{ fontSize: "1.75rem", fontWeight: 900, margin: "0 0 0.75rem 0", color: "var(--tpl-b-fg)", letterSpacing: "-0.02em" }}>
+                    Curious Creator & Problem Solver
+                  </h3>
+                  <p style={{ fontSize: "1.05rem", color: "var(--tpl-b-muted)", lineHeight: 1.65, margin: "0 0 1rem 0", fontWeight: 500 }}>
+                    Turning ideas into colorful, tactile digital experiences with robust architecture, thoughtful animations, and accessible design.
+                  </p>
+
+                  <div className="tpl-sticky-notes-row">
+                    <div className="tpl-sticky-note tpl-sticky-amber">
+                      &quot;make it interactive! 🚀&quot;
+                    </div>
+                    <div className="tpl-sticky-note tpl-sticky-sky">
+                      &quot;coffee ➔ code ➔ repeat ☕&quot;
+                    </div>
+                    <div className="tpl-sticky-note tpl-sticky-emerald">
+                      &quot;love good UI ✦&quot;
                     </div>
                   </div>
                 </div>
@@ -239,7 +320,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         {/* ── About Section ─────────────────────────────────────────────── */}
         <section id="about" className="tpl-section">
           <div className="tpl-container">
-            <div className="tpl-header-block">
+            <div className="tpl-header-block tpl-b-reveal">
               <span className="tpl-badge">
                 <SparklesIcon />
                 <span>OVERVIEW</span>
@@ -248,7 +329,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
               <p className="tpl-subtitle">Background, values, and core professional experience.</p>
             </div>
 
-            <div className="tpl-about-card">
+            <div className="tpl-about-card tpl-b-reveal">
               <p className="tpl-about-bio">{basics.bio}</p>
 
               {(basics.location || contact.email) && (
@@ -275,7 +356,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         {hasProjects && (
           <section id="projects" className="tpl-section">
             <div className="tpl-container">
-              <div className="tpl-header-block">
+              <div className="tpl-header-block tpl-b-reveal">
                 <span className="tpl-badge">
                   <SparklesIcon />
                   <span>SHOWCASE</span>
@@ -284,13 +365,45 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                 <p className="tpl-subtitle">Selected work, projects, and case studies.</p>
               </div>
 
+              {/* Tag filtering pills */}
+              {allProjectTags.length > 0 && (
+                <div className="tpl-b-filter-row tpl-b-reveal" role="group" aria-label="Filter projects by tag">
+                  <button
+                    type="button"
+                    className="tpl-b-filter-btn active"
+                    data-filter="all"
+                  >
+                    All ({projects.length})
+                  </button>
+                  {allProjectTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      className="tpl-b-filter-btn"
+                      data-filter={tag}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <p className="tpl-b-project-count" aria-live="polite">
+                Showing {projects.length} of {projects.length} projects
+              </p>
+
               <div className="tpl-projects-grid">
                 {projects.map((project, idx) => {
                   const safeLive = sanitizeHref(project.liveUrl);
                   const safeRepo = sanitizeHref(project.repoUrl);
+                  const tagsJoin = (project.tags || []).join("||");
 
                   return (
-                    <article key={idx} className="tpl-project-card">
+                    <article
+                      key={idx}
+                      className="tpl-project-card tpl-b-reveal"
+                      data-tags={tagsJoin}
+                    >
                       <div className="tpl-project-thumb">
                         {project.image ? (
                           <img
@@ -357,7 +470,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         {hasSkills && (
           <section id="skills" className="tpl-section">
             <div className="tpl-container">
-              <div className="tpl-header-block">
+              <div className="tpl-header-block tpl-b-reveal">
                 <span className="tpl-badge">
                   <SparklesIcon />
                   <span>EXPERTISE</span>
@@ -368,11 +481,10 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
 
               <div className="tpl-skills-grid">
                 {skills.map((skill, sIdx) => (
-                  <div key={sIdx} className="tpl-skill-pill">
-                    <span className="tpl-skill-dot" aria-hidden="true" />
+                  <div key={sIdx} className="tpl-skill-pill tpl-b-reveal">
                     <span>{skill.name}</span>
                     {skill.category && (
-                      <span className="tpl-skill-cat">• {skill.category}</span>
+                      <span className="tpl-skill-cat">{skill.category}</span>
                     )}
                   </div>
                 ))}
@@ -385,7 +497,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         {(hasExperience || hasEducation) && (
           <section id="experience" className="tpl-section">
             <div className="tpl-container">
-              <div className="tpl-header-block">
+              <div className="tpl-header-block tpl-b-reveal">
                 <span className="tpl-badge">
                   <SparklesIcon />
                   <span>CAREER PATH</span>
@@ -397,7 +509,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
               <div className="tpl-timeline-wrap">
                 {hasExperience &&
                   experience.map((exp, eIdx) => (
-                    <div key={eIdx} className="tpl-career-card">
+                    <div key={eIdx} className="tpl-career-card tpl-b-reveal">
                       <div className="tpl-career-header">
                         <div>
                           <h3 className="tpl-career-role">{exp.role}</h3>
@@ -425,7 +537,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
 
                 {hasEducation &&
                   education.map((edu, eduIdx) => (
-                    <div key={eduIdx} className="tpl-career-card">
+                    <div key={eduIdx} className="tpl-career-card tpl-b-reveal">
                       <div className="tpl-career-header">
                         <div>
                           <h3 className="tpl-career-role">{edu.degree}</h3>
@@ -449,7 +561,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         {/* ── Contact Section ──────────────────────────────────────────── */}
         <section id="contact" className="tpl-section">
           <div className="tpl-container">
-            <div className="tpl-contact-box">
+            <div className="tpl-contact-box tpl-b-reveal">
               <div className="tpl-contact-grid">
                 <div>
                   <h2 className="tpl-contact-title">Let&apos;s Work Together</h2>
@@ -550,7 +662,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         <div className="tpl-container">
           <div className="tpl-footer-inner">
             <span>© {new Date().getFullYear()} {basics.fullName}. All rights reserved.</span>
-            <span>✦ Powered by Portfolio Builder</span>
+            <span>✦ Neo-Pop Portfolio powered by Portfolio Builder</span>
           </div>
         </div>
 
@@ -563,7 +675,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         </button>
       </footer>
 
-      {/* Tiny static interaction script (< 1.5 KB) */}
+      {/* Tiny static interaction script (< 2 KB) */}
       <script dangerouslySetInnerHTML={{ __html: templateBScript }} />
     </div>
   );
@@ -572,7 +684,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
 export const templateB: PortfolioTemplate = {
   id: "template-b",
   name: "Neo-Pop",
-  description: "A bold, playful neo-brutalist aesthetic with hard shadows, polaroid frames, and dark mode.",
+  description: "A bold, playful neo-brutalist aesthetic with hard shadows, polaroid frames, terminal cards, and dark mode.",
   previewImage: "/previews/template-b.png",
   render,
   css: templateBCss,

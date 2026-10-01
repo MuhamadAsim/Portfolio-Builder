@@ -44,6 +44,9 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
   const safeEmailHref = contact.email ? `mailto:${contact.email.trim()}` : undefined;
   const safePhoneHref = contact.phone ? `tel:${contact.phone.replace(/[^+\d]/g, "")}` : undefined;
 
+  // Orbit skills slice (up to 6 items for the circular orbit visualization)
+  const orbitSkills = hasSkills ? skills.slice(0, 6) : [];
+
   return (
     <div className="tpl-a">
       {/* ── Navbar ────────────────────────────────────────────────────── */}
@@ -142,9 +145,13 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
       <main>
         {/* ── Hero Section ──────────────────────────────────────────────── */}
         <section id="hero" className="tpl-hero">
+          {/* Interactive Particle Network Background */}
+          <canvas className="tpl-hero-canvas" suppressHydrationWarning aria-hidden="true" />
+          <div className="tpl-hero-glow-blob" aria-hidden="true" />
+
           <div className="tpl-container">
-            <div className="tpl-hero-grid">
-              <div className="tpl-hero-text">
+            <div className={`tpl-hero-grid ${basics.photo ? "" : "is-centered"}`}>
+              <div className="tpl-hero-text tpl-reveal">
                 <div className="tpl-hero-meta-row">
                   <span className="tpl-badge">Portfolio</span>
                   {basics.availability && (
@@ -154,9 +161,15 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                     </span>
                   )}
                 </div>
-                <h1 className="tpl-hero-title">{basics.fullName}</h1>
-                <p className="tpl-hero-role">{basics.title}</p>
-                <p className="tpl-hero-bio">{basics.bio}</p>
+
+                <div>
+                  <h1 className="tpl-hero-title">{basics.fullName}</h1>
+                  {basics.title && (
+                    <span className="tpl-hero-role-outline">{basics.title}</span>
+                  )}
+                </div>
+
+                {basics.bio && <p className="tpl-hero-bio">{basics.bio}</p>}
 
                 <div className="tpl-hero-actions">
                   <a href="#contact" className="tpl-btn-primary">
@@ -167,55 +180,69 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                       View Work
                     </a>
                   )}
+                  {safeResumeUrl && (
+                    <a
+                      href={safeResumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="tpl-btn-secondary"
+                    >
+                      <span>Resume</span>
+                      <ArrowUpRightIcon />
+                    </a>
+                  )}
                 </div>
               </div>
 
-              <div className="tpl-hero-image-wrap">
-                {basics.photo ? (
-                  <img
-                    src={`${opts.assetBase}/${encodeURIComponent(basics.photo)}`}
-                    alt={basics.fullName}
-                    className="tpl-avatar"
-                  />
-                ) : (
-                  <div className="tpl-avatar-placeholder" aria-label={basics.fullName}>
-                    <AvatarPlaceholder />
-                  </div>
-                )}
+              {/* Profile Image Frame with glowing aura */}
+              <div className="tpl-hero-image-wrap tpl-reveal">
+                <div className="tpl-avatar-aura" aria-hidden="true" />
+                <div className="tpl-avatar-frame">
+                  {basics.photo ? (
+                    <img
+                      src={`${opts.assetBase}/${encodeURIComponent(basics.photo)}`}
+                      alt={basics.fullName}
+                      className="tpl-avatar"
+                    />
+                  ) : (
+                    <div className="tpl-avatar-placeholder" aria-label={basics.fullName}>
+                      <AvatarPlaceholder />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Curved SVG transition */}
+        {/* Curved SVG Wave: Hero -> About (Faithful to reference M0,120...) */}
         <svg
-          className="tpl-divider"
-          style={{ color: "#ffffff", background: "var(--tpl-bg)" }}
-          viewBox="0 0 1200 48"
+          className="tpl-wave-to-about"
+          viewBox="0 0 1920 120"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <path d="M0,0 C300,48 900,48 1200,0 L1200,48 L0,48 Z" />
+          <path d="M0,40 C480,120 1440,0 1920,60 L1920,120 L0,120 Z" />
         </svg>
 
-        {/* ── About Section ─────────────────────────────────────────────── */}
+        {/* ── About Section (Deep Royal Purple) ─────────────────────────── */}
         <section id="about" className="tpl-section tpl-about">
           <div className="tpl-container">
-            <div className="tpl-header-block">
+            <div className="tpl-header-block tpl-reveal">
               <span className="tpl-badge">Background</span>
               <h2 className="tpl-title">About Me</h2>
-              <p className="tpl-subtitle">
-                A brief overview of my engineering focus, journey, and technical values.
+              <p className="tpl-subtitle" style={{ color: "rgba(255, 255, 255, 0.75)" }}>
+                Engineering focus, technological mindset, and development philosophy.
               </p>
             </div>
 
-            <div className="tpl-about-card">
+            <div className="tpl-about-card tpl-reveal">
               {basics.bioQuote && (
                 <div className="tpl-about-quote">
                   &ldquo;{basics.bioQuote}&rdquo;
                 </div>
               )}
-              <div className="tpl-about-text">{basics.bio}</div>
+              {basics.bio && <div className="tpl-about-text">{basics.bio}</div>}
 
               {(basics.location || contact.email) && (
                 <div className="tpl-about-meta">
@@ -237,13 +264,76 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
           </div>
         </section>
 
+        {/* Curved SVG Wave: About -> Next Section (Light background) */}
+        <svg
+          className="tpl-wave-from-about"
+          viewBox="0 0 1920 120"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M0,40 C480,120 1440,0 1920,60 L1920,120 L0,120 Z" />
+        </svg>
+
+        {/* ── Skills Section (Interactive Badges + Orbit Wheel) ─────────── */}
+        {hasSkills && (
+          <section id="skills" className="tpl-section tpl-skills">
+            <div className="tpl-container">
+              <div className="tpl-header-block tpl-reveal">
+                <span className="tpl-badge">Core Competencies</span>
+                <h2 className="tpl-title">Skills & Expertise</h2>
+                <p className="tpl-subtitle">
+                  Technologies, frameworks, and engineering tools applied across development.
+                </p>
+              </div>
+
+              <div className="tpl-skills-layout">
+                {/* Left: Skill badges grid */}
+                <div className="tpl-skills-left tpl-reveal">
+                  <div className="tpl-skills-grid">
+                    {skills.map((skill, sIdx) => (
+                      <div key={sIdx} className="tpl-skill-badge">
+                        <span>{skill.name}</span>
+                        {skill.category && (
+                          <span className="tpl-skill-cat">{skill.category}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right: Tech Orbit Showcase Ring */}
+                <div className="tpl-skills-orbit-wrap tpl-reveal" aria-hidden="true">
+                  <div className="tpl-orbit-ring" />
+                  <div className="tpl-orbit-ring-inner" />
+                  <div className="tpl-orbit-center">
+                    <span>Tech</span>
+                    <span>Stack</span>
+                  </div>
+
+                  {orbitSkills.map((sk, idx) => (
+                    <div
+                      key={idx}
+                      className={`tpl-orbit-node tpl-node-${idx + 1}`}
+                    >
+                      {sk.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── Projects Section ─────────────────────────────────────────── */}
         {hasProjects && (
           <section id="projects" className="tpl-section tpl-projects">
+            <div className="tpl-blob-top-right" aria-hidden="true" />
+            <div className="tpl-blob-bottom-left" aria-hidden="true" />
+
             <div className="tpl-container">
-              <div className="tpl-header-block">
-                <span className="tpl-badge">Featured Work</span>
-                <h2 className="tpl-title">Projects</h2>
+              <div className="tpl-header-block tpl-reveal">
+                <span className="tpl-badge">My Work</span>
+                <h2 className="tpl-title">Recent Projects</h2>
                 <p className="tpl-subtitle">
                   Selected software applications, platforms, and open source repositories.
                 </p>
@@ -272,6 +362,10 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                 </div>
               )}
 
+              <p className="tpl-project-live-count" aria-live="polite">
+                Showing {projects.length} of {projects.length} projects
+              </p>
+
               <div className="tpl-projects-grid">
                 {projects.map((project, idx) => {
                   const safeLive = sanitizeHref(project.liveUrl);
@@ -281,7 +375,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                   return (
                     <article
                       key={idx}
-                      className="tpl-project-card"
+                      className="tpl-project-card tpl-reveal"
                       data-tags={tagsJoin}
                     >
                       <div className="tpl-project-thumb">
@@ -346,37 +440,11 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
           </section>
         )}
 
-        {/* ── Skills Section ───────────────────────────────────────────── */}
-        {hasSkills && (
-          <section id="skills" className="tpl-section tpl-skills">
-            <div className="tpl-container">
-              <div className="tpl-header-block">
-                <span className="tpl-badge">Core Competencies</span>
-                <h2 className="tpl-title">Skills & Expertise</h2>
-                <p className="tpl-subtitle">
-                  Technologies, frameworks, and engineering tools applied across development.
-                </p>
-              </div>
-
-              <div className="tpl-skills-grid">
-                {skills.map((skill, sIdx) => (
-                  <div key={sIdx} className="tpl-skill-card">
-                    <span className="tpl-skill-name">{skill.name}</span>
-                    {skill.category && (
-                      <span className="tpl-skill-cat">{skill.category}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* ── Experience & Education Section ───────────────────────────── */}
         {(hasExperience || hasEducation) && (
-          <section id="experience" className="tpl-section tpl-about">
+          <section id="experience" className="tpl-section">
             <div className="tpl-container">
-              <div className="tpl-header-block">
+              <div className="tpl-header-block tpl-reveal">
                 <span className="tpl-badge">Career & Learning</span>
                 <h2 className="tpl-title">Experience & Education</h2>
                 <p className="tpl-subtitle">
@@ -387,7 +455,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
               <div className="tpl-timeline-wrap">
                 {hasExperience &&
                   experience.map((exp, eIdx) => (
-                    <div key={eIdx} className="tpl-timeline-card">
+                    <div key={eIdx} className="tpl-timeline-card tpl-reveal">
                       <div className="tpl-timeline-header">
                         <div>
                           <h3 className="tpl-timeline-role">{exp.role}</h3>
@@ -413,7 +481,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
 
                 {hasEducation &&
                   education.map((edu, eduIdx) => (
-                    <div key={eduIdx} className="tpl-timeline-card">
+                    <div key={eduIdx} className="tpl-timeline-card tpl-reveal">
                       <div className="tpl-timeline-header">
                         <div>
                           <h3 className="tpl-timeline-role">{edu.degree}</h3>
@@ -437,16 +505,20 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         {/* ── Contact Section ──────────────────────────────────────────── */}
         <section id="contact" className="tpl-section tpl-contact">
           <div className="tpl-container">
-            <div className="tpl-header-block">
-              <span className="tpl-badge">Let&apos;s Connect</span>
-              <h2 className="tpl-title">Get in Touch</h2>
+            <div className="tpl-header-block tpl-reveal">
+              <span className="tpl-badge tpl-contact-pill-float">Get In Touch</span>
+              <h2 className="tpl-title">Let&apos;s Work Together</h2>
               <p className="tpl-subtitle">
-                Available for engineering opportunities, collaborations, or inquiries.
+                Available for engineering opportunities, technical advisory, or collaborations.
               </p>
             </div>
 
             <div className="tpl-contact-grid">
-              <div className="tpl-contact-card">
+              <div className="tpl-contact-card tpl-reveal">
+                <h3 style={{ fontSize: "1.25rem", fontWeight: 800, margin: 0, color: "var(--tpl-primary)" }}>
+                  Contact Information
+                </h3>
+
                 <div className="tpl-contact-item">
                   <div className="tpl-contact-icon">
                     <MailIcon />
@@ -494,12 +566,12 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                 )}
               </div>
 
-              <div className="tpl-contact-card">
-                <h3 style={{ fontSize: "1.15rem", fontWeight: 800, margin: 0 }}>
-                  Profiles & Links
+              <div className="tpl-contact-card tpl-reveal">
+                <h3 style={{ fontSize: "1.25rem", fontWeight: 800, margin: 0, color: "var(--tpl-primary)" }}>
+                  Let&apos;s Connect
                 </h3>
-                <p style={{ fontSize: "0.925rem", color: "var(--tpl-muted)", margin: 0 }}>
-                  Explore verified project repositories, professional profiles, and portfolio work.
+                <p style={{ fontSize: "0.95rem", color: "var(--tpl-muted)", margin: 0 }}>
+                  Follow my work, check code repositories, or reach out directly.
                 </p>
 
                 <div className="tpl-social-row">
@@ -550,8 +622,12 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                 </div>
 
                 {safeEmailHref && (
-                  <div style={{ marginTop: "auto", paddingTop: "1rem" }}>
-                    <a href={safeEmailHref} className="tpl-btn-primary" style={{ width: "100%", justifyContent: "center" }}>
+                  <div style={{ marginTop: "auto", paddingTop: "0.75rem" }}>
+                    <a
+                      href={safeEmailHref}
+                      className="tpl-btn-primary"
+                      style={{ width: "100%", justifyContent: "center" }}
+                    >
                       Send an Email
                     </a>
                   </div>
@@ -567,7 +643,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         <div className="tpl-container">
           <div className="tpl-footer-inner">
             <span>© {new Date().getFullYear()} {basics.fullName}. All rights reserved.</span>
-            <span>Static-ready portfolio powered by Portfolio Builder.</span>
+            <span>Static portfolio generated by Portfolio Builder.</span>
           </div>
         </div>
 
@@ -580,7 +656,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
         </button>
       </footer>
 
-      {/* Tiny static interaction script (< 1.5 KB) */}
+      {/* Interactive client script */}
       <script dangerouslySetInnerHTML={{ __html: templateAScript }} />
     </div>
   );
@@ -589,7 +665,7 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
 export const templateA: PortfolioTemplate = {
   id: "template-a",
   name: "Clean Modern",
-  description: "A refined, glassmorphic layout with elegant section dividers and tag-filtered showcases.",
+  description: "A refined, glassmorphic layout with particle network, organic wave dividers, and interactive showcases.",
   previewImage: "/previews/template-a.png",
   render,
   css: templateACss,
