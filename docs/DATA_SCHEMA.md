@@ -63,6 +63,7 @@ export const portfolioDataSchema = z.object({
     twitter: optionalUrl,
     website: optionalUrl,
     resumeUrl: optionalUrl,
+    resumePdf: z.string().regex(PDF_FILENAME_REGEX).optional(), // stored uuid.pdf filename
   }),
   skills: z.array(skillSchema).max(30).default([]),
   experience: z.array(experienceSchema).max(10).default([]),

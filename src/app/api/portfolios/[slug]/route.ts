@@ -184,6 +184,9 @@ export async function PUT(
   if (data.basics.photo) {
     referencedImages.push(data.basics.photo);
   }
+  if (data.contact.resumePdf) {
+    referencedImages.push(data.contact.resumePdf);
+  }
   for (const proj of data.projects) {
     if (proj.image) {
       referencedImages.push(proj.image);

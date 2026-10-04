@@ -1,19 +1,24 @@
 "use client";
 
 import React from "react";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { UseFormRegister, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { PortfolioFormValues } from "../types";
+import { ResumeUploader } from "../ResumeUploader";
 
 interface Step2ContactProps {
   stepHeadingRef: React.RefObject<HTMLHeadingElement | null>;
   register: UseFormRegister<PortfolioFormValues>;
+  setValue: UseFormSetValue<PortfolioFormValues>;
   errors: FieldErrors<PortfolioFormValues>;
+  resumePdfValue?: string;
 }
 
 export function Step2Contact({
   stepHeadingRef,
   register,
+  setValue,
   errors,
+  resumePdfValue,
 }: Step2ContactProps) {
   return (
     <fieldset className="space-y-6">
@@ -116,37 +121,14 @@ export function Step2Contact({
         <p id="twitter-desc" className="text-xs text-slate-500 mt-1">Must start with https://</p>
       </div>
 
-      {/* Website */}
-      <div>
-        <label htmlFor="contactWebsite" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-          Personal Website / Blog <span className="text-slate-500 font-normal">(Optional)</span>
-        </label>
-        <input
-          id="contactWebsite"
-          type="url"
-          {...register("contact.website")}
-          aria-describedby="website-desc"
-          placeholder="https://yourwebsite.com"
-          className="w-full px-3.5 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm"
-        />
-        <p id="website-desc" className="text-xs text-slate-500 mt-1">Must start with https://</p>
-      </div>
-
-      {/* Resume URL */}
-      <div>
-        <label htmlFor="contactResume" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-          Resume / CV Link <span className="text-slate-500 font-normal">(Optional)</span>
-        </label>
-        <input
-          id="contactResume"
-          type="url"
-          {...register("contact.resumeUrl")}
-          aria-describedby="resume-desc"
-          placeholder="https://yourdomain.com/resume.pdf"
-          className="w-full px-3.5 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm"
-        />
-        <p id="resume-desc" className="text-xs text-slate-500 mt-1">Link to downloadable PDF resume.</p>
-      </div>
+      {/* Resume / CV PDF Upload */}
+      <ResumeUploader
+        id="contactResumePdf"
+        label="Resume / CV (PDF Upload)"
+        value={resumePdfValue}
+        onChange={(filename) => setValue("contact.resumePdf", filename, { shouldValidate: true })}
+        helperText="Upload your PDF resume (up to 5 MB). Visitors can download it directly from your portfolio."
+      />
     </fieldset>
   );
 }

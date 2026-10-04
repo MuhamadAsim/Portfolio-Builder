@@ -116,10 +116,13 @@ export async function buildPortfolioZip(slug: string): Promise<ExportZipResult |
   archive.append(template.css, { name: "styles.css" });
   archive.append(readme, { name: "README.txt" });
 
-  // Gather referenced images
+  // Gather referenced images and assets
   const referencedImages: string[] = [];
   if (data.basics.photo) {
     referencedImages.push(data.basics.photo);
+  }
+  if (data.contact.resumePdf) {
+    referencedImages.push(data.contact.resumePdf);
   }
   for (const project of data.projects) {
     if (project.image) {

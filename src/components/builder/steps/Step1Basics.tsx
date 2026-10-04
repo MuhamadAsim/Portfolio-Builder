@@ -4,6 +4,8 @@ import React from "react";
 import { UseFormRegister, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { PortfolioFormValues } from "../types";
 import { ImageUploader } from "../ImageUploader";
+import { ResumeUploader } from "../ResumeUploader";
+import type { ResumeParseResponse } from "../hooks/useResumeUpload";
 import { getAllTemplates } from "@/templates/registry";
 
 interface Step1BasicsProps {
@@ -14,6 +16,7 @@ interface Step1BasicsProps {
   templateId: "template-a" | "template-b";
   setTemplateId: (id: "template-a" | "template-b") => void;
   photoValue?: string;
+  resumePdfValue?: string;
 }
 
 export function Step1Basics({
@@ -24,8 +27,24 @@ export function Step1Basics({
   templateId,
   setTemplateId,
   photoValue,
+  resumePdfValue,
 }: Step1BasicsProps) {
   const allTemplates = getAllTemplates();
+
+  const handleResumeParsed = (result: ResumeParseResponse) => {
+    const ext = result.extracted;
+    if (ext.fullName) setValue("basics.fullName", ext.fullName, { shouldValidate: true });
+    if (ext.title) setValue("basics.title", ext.title, { shouldValidate: true });
+    if (ext.bio) setValue("basics.bio", ext.bio, { shouldValidate: true });
+    if (ext.location) setValue("basics.location", ext.location, { shouldValidate: true });
+    if (ext.email) setValue("contact.email", ext.email, { shouldValidate: true });
+    if (ext.phone) setValue("contact.phone", ext.phone, { shouldValidate: true });
+    if (ext.github) setValue("contact.github", ext.github, { shouldValidate: true });
+    if (ext.linkedin) setValue("contact.linkedin", ext.linkedin, { shouldValidate: true });
+    if (ext.twitter) setValue("contact.twitter", ext.twitter, { shouldValidate: true });
+    if (ext.skills && ext.skills.length > 0) setValue("skills", ext.skills, { shouldValidate: true });
+    setValue("contact.resumePdf", result.filename, { shouldValidate: true });
+  };
 
   return (
     <fieldset className="space-y-6">
@@ -40,6 +59,29 @@ export function Step1Basics({
         <p className="text-sm text-slate-400 mt-1">
           Select your visual layout and fill in your primary details.
         </p>
+      </div>
+
+      {/* Quick Start from Resume (PDF) */}
+      <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-900 border border-indigo-500/30 space-y-3">
+        <div>
+          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <span className="text-indigo-400">⚡</span>
+            <span>Quick Start: Auto-fill from Resume / CV</span>
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Upload your PDF resume to automatically pre-populate your name, contact details, links, and skills without typing them manually.
+          </p>
+        </div>
+
+        <ResumeUploader
+          id="quickstartResumePdf"
+          label="Upload Resume (PDF)"
+          value={resumePdfValue}
+          onChange={(filename) => setValue("contact.resumePdf", filename, { shouldValidate: true })}
+          onParsed={handleResumeParsed}
+          isQuickStart={true}
+          helperText="Select or drop your PDF (max 5 MB). Processed securely in seconds without AI."
+        />
       </div>
 
       {/* Template Chooser Radios */}

@@ -11,10 +11,18 @@ export const optionalUrl = httpsUrl
 
 export const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{1,28})[a-z0-9]$/; // 3–30 chars
 export const IMAGE_FILENAME_REGEX = /^[a-f0-9-]{36}\.webp$/; // 36-char uuid + .webp
+export const PDF_FILENAME_REGEX = /^[a-f0-9-]{36}\.pdf$/; // 36-char uuid + .pdf
+export const ASSET_FILENAME_REGEX = /^[a-f0-9-]{36}\.(webp|pdf)$/;
 
 export const imageFilenameSchema = z
   .string()
   .regex(IMAGE_FILENAME_REGEX, "Image must be a valid 36-character UUID .webp filename")
+  .optional()
+  .or(z.literal("").transform(() => undefined));
+
+export const pdfFilenameSchema = z
+  .string()
+  .regex(PDF_FILENAME_REGEX, "Resume must be a valid 36-character UUID .pdf filename")
   .optional()
   .or(z.literal("").transform(() => undefined));
 
@@ -67,6 +75,7 @@ export const contactSchema = z.object({
   twitter: optionalUrl,
   website: optionalUrl,
   resumeUrl: optionalUrl,
+  resumePdf: pdfFilenameSchema,
 });
 
 export const portfolioDataSchema = z.object({

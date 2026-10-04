@@ -2,7 +2,7 @@ import sharp from "sharp";
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
-import { IMAGE_FILENAME_REGEX } from "./schema/portfolio";
+import { ASSET_FILENAME_REGEX } from "./schema/portfolio";
 
 export const MAX_UPLOAD_SIZE = 2 * 1024 * 1024; // 2 MB
 export const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp"]);
@@ -93,7 +93,7 @@ export const PORTFOLIO_ID_REGEX = /^[a-zA-Z0-9_-]{1,36}$/;
  * Returns null if the filename is invalid or file does not exist.
  */
 export async function getTmpUploadPath(filename: string): Promise<string | null> {
-  if (!IMAGE_FILENAME_REGEX.test(filename)) {
+  if (!ASSET_FILENAME_REGEX.test(filename)) {
     return null;
   }
   const filePath = path.join(getTmpUploadsDir(), filename);
@@ -114,7 +114,7 @@ export async function getPortfolioUploadPath(
   portfolioId: string,
   filename: string
 ): Promise<string | null> {
-  if (!PORTFOLIO_ID_REGEX.test(portfolioId) || !IMAGE_FILENAME_REGEX.test(filename)) {
+  if (!PORTFOLIO_ID_REGEX.test(portfolioId) || !ASSET_FILENAME_REGEX.test(filename)) {
     return null;
   }
   const filePath = path.join(getUploadsRoot(), portfolioId, filename);
@@ -128,7 +128,7 @@ export async function getPortfolioUploadPath(
 }
 
 /**
- * Copies deduplicated image files from uploads/tmp/ to uploads/<portfolioId>/.
+ * Copies deduplicated image/asset files from uploads/tmp/ to uploads/<portfolioId>/.
  */
 export async function copyPortfolioUploads(
   portfolioId: string,
@@ -142,8 +142,8 @@ export async function copyPortfolioUploads(
   await fs.mkdir(targetDir, { recursive: true });
 
   for (const filename of filenames) {
-    if (!IMAGE_FILENAME_REGEX.test(filename)) {
-      throw new Error(`Invalid image filename format: ${filename}`);
+    if (!ASSET_FILENAME_REGEX.test(filename)) {
+      throw new Error(`Invalid asset filename format: ${filename}`);
     }
     const sourcePath = path.join(getTmpUploadsDir(), filename);
     const destPath = path.join(targetDir, filename);
@@ -171,7 +171,7 @@ export async function removePortfolioUploads(portfolioId: string): Promise<void>
  * Checks uploads/tmp/ first, then scans published portfolio subdirectories.
  */
 export async function findUploadFile(filename: string): Promise<string | null> {
-  if (!IMAGE_FILENAME_REGEX.test(filename)) {
+  if (!ASSET_FILENAME_REGEX.test(filename)) {
     return null;
   }
 

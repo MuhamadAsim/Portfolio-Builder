@@ -37,6 +37,9 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
   ).filter(Boolean);
 
   const safeResumeUrl = sanitizeHref(contact.resumeUrl);
+  const resumeHref = contact.resumePdf
+    ? `${opts.assetBase}/${encodeURIComponent(contact.resumePdf)}`
+    : safeResumeUrl;
   const safeGithub = sanitizeHref(contact.github);
   const safeLinkedin = sanitizeHref(contact.linkedin);
   const safeTwitter = sanitizeHref(contact.twitter);
@@ -92,9 +95,9 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
             </ul>
 
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              {safeResumeUrl && (
+              {resumeHref && (
                 <a
-                  href={safeResumeUrl}
+                  href={resumeHref}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="tpl-resume-btn"
@@ -180,9 +183,9 @@ export function render(data: PortfolioData, opts: RenderOptions): React.ReactEle
                       View Work
                     </a>
                   )}
-                  {safeResumeUrl && (
+                  {resumeHref && (
                     <a
-                      href={safeResumeUrl}
+                      href={resumeHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="tpl-btn-secondary"

@@ -21,6 +21,7 @@ export const defaultFormValues: PortfolioFormValues = {
     twitter: "",
     website: "",
     resumeUrl: "",
+    resumePdf: undefined,
   },
   skills: [],
   experience: [],

@@ -178,8 +178,7 @@ export function BuilderApp({
         "contact.github",
         "contact.linkedin",
         "contact.twitter",
-        "contact.website",
-        "contact.resumeUrl",
+        "contact.resumePdf",
       ]);
     } else if (currentStep === 3) {
       isValid = await trigger(["skills"]);
@@ -526,6 +525,7 @@ export function BuilderApp({
                   templateId={templateId}
                   setTemplateId={setTemplateId}
                   photoValue={watchedValues.basics?.photo}
+                  resumePdfValue={watchedValues.contact?.resumePdf}
                 />
               )}
 
@@ -533,7 +533,9 @@ export function BuilderApp({
                 <Step2Contact
                   stepHeadingRef={stepHeadingRef}
                   register={register}
+                  setValue={setValue}
                   errors={errors}
+                  resumePdfValue={watchedValues.contact?.resumePdf}
                 />
               )}
 
