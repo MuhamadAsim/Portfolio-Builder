@@ -1,4 +1,4 @@
-import { PDFParse } from "pdf-parse";
+import { extractText } from "unpdf";
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -327,14 +327,19 @@ export async function parseAndSaveResumePdf(buffer: Buffer): Promise<ParseResume
 
   await ensureUploadDirs();
 
-  // Parse text using PDFParse
-  const parser = new PDFParse({ data: buffer });
+  // Parse text using unpdf
   let extractedText = "";
   try {
-    const parsedDoc = await parser.getText();
-    extractedText = parsedDoc.text || "";
-  } finally {
-    await parser.destroy();
+    const uint8Array = new Uint8Array(buffer);
+    const parsedDoc = await extractText(uint8Array, { mergePages: true });
+    extractedText =
+      typeof parsedDoc.text === "string"
+        ? parsedDoc.text
+        : Array.isArray(parsedDoc.text)
+        ? (parsedDoc.text as string[]).join("\n")
+        : "";
+  } catch {
+    extractedText = "";
   }
 
   const extracted = extractDataFromResumeText(extractedText);
